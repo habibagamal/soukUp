@@ -1,3 +1,4 @@
+//macros
 #define m1 -1 //metal 1
 #define m2 -2 //metal 2
 #define m3 -3 //metal 3
@@ -5,24 +6,38 @@
 #define v23 -5 //via m2-m3
 #define v123 -6 //via m1-m2-m3
 
+//includes
 #include <iostream>
 #include <vector>
 #include <math.h>
 using namespace std;
-int x, y;
 
+//structs
 struct coord{int x; int y; int z;};
 
+//global variables
+int cells = 0;
+int route = -10;
+
+//function declarations
+void input(coord &source, coord &target, int x, int y);
 void printMatrix (vector<vector<int>> m, int x, int y);
-coord traverse(vector <vector<int>> l, vector<vector<int>> &m, int x, int y, coord s, coord t);
-void noFlooding (vector <vector<int>> l1, vector <vector<int>> l2, vector <vector<int>> l3, vector<vector<int>> &m, int x, int y, coord newSource, coord target);
+coord traverse(vector <vector<int>> &l,  int x, int y, coord s, coord t);
+void noFlooding (vector <vector<int>> l1, vector <vector<int>> l2, vector <vector<int>> l3, int x, int y, coord newSource, coord target);
 void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0);
-int backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, vector<vector<int>> &m, int x, int y, coord source, coord target, int via, coord source1);
-void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, vector<vector<int>> &m, int x, int y);
+void backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1);
+void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y);
+void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via);
 
-
+//main
 int main(){
+    int x, y;
+    
     //getting the input dimensions
+    int via;
+    
+    cout << "Please enter cost of via\n";
+    cin >> via;
     cout << "Please enter the x-dimension of the plane\n";
     cin >> x;
     cout << "Please enter the y-dimension of the plane\n";
@@ -33,7 +48,6 @@ int main(){
     vector <vector <int>> l1(x,rows); //layer 1
     vector <vector <int>> l2(x,rows); //layer 2
     vector <vector <int>> l3(x,rows); //layer 3
-    vector <vector <int>> m(x, rows);
     
     for (int i = 0; i<x; i++){
         for (int j = 0; j<y; j++){
@@ -43,60 +57,51 @@ int main(){
     
     l2 = l1;
     l3 = l1;
-    m = l1;
+    
     coord source, target;
-    cout << "sx, sy, sz"<<endl;
-    cin >> source.x >> source.y >> source.z;
-    cout << "tx, ty, tz"<<endl;
-    cin >> target.x >> target.y >> target.z;
-    l1[4][7] = -7;
-    coord newSource;
-    switch (source.z){
-        case(1): newSource = traverse(l1, l1, x, y, source, target);
-            break;
-        case (2): newSource = traverse(l2, l2, x, y, source, target);
-            break;
-        case (3): newSource = traverse(l3, l3, x, y, source, target);
-            break;
-    }
-    int count0;
-    if ((newSource.x == target.x) && (newSource.y == target.y) && (newSource.z == target.z))
-        cout << "DONEEEE" << endl;
-    else {
-        if(newSource.z < target.z){
-            newSource.z = ((newSource.z) % 3 )+ 1;
-            count0 = 11;
-        }
-        else if (newSource.z > target.z){
-            newSource.z = ((newSource.z - 1) % 3 );
-            count0 = 11;
-        }
-        else if ((newSource.z == target.z) && ((target.z == 1) || (target.z == 3)) && (newSource.x != target.x)){
-            newSource.z = 2;
-            count0 = 11;
-        }
-        else if ((newSource.z == target.z) && (target.z == 2) && (newSource.y != target.y)){
-            newSource.z = ((newSource.z) % 3 )+ 1;
-            count0 = 11;
-        }
-        cout << "New source is " << newSource.x << " " << newSource.y << " " << newSource.z << endl;
-        flood(l1, l2, l3, x, y, newSource, target, 10, count0);
-        printMatrix(l1, x, y);
-        cout << endl << endl;
-        printMatrix(l2, x, y);
-        cout << endl << endl;
-        printMatrix(l3, x, y);
-        cout << endl << endl;
-        backTracking(l1, l2, l3, m, x, y, newSource, target, 10, source);
-        backToLife(l1, l2, l3, m, x, y);
-        printMatrix(l1, x, y);
-        cout << endl << endl;
-        printMatrix(l2, x, y);
-        cout << endl << endl;
-        printMatrix(l3, x, y);
-        cout << endl << endl;
+    source.x = source.y = source.z = target.x = target.y = target.z = 0;
+    
+    while (source.x >= 0 && source.y >= 0 && source.z >= 0 && target.x >= 0 && target.y >= 0 && target.z >= 0){
+        input(source, target, x, y);
+        if (source.x >= 0 && source.y >= 0 && source.z >= 0 && target.x >= 0 && target.y >= 0 && target.z >= 0)
+            classicalImplementation(l1, l2, l3, x, y, source, target, via);
+        route--;
+
     }
     return 0;
+}
+
+//function definitions
+void input(coord &source, coord &target, int x, int y){
+    do{
+        cout << "Enter x coordinate of source\n";
+        cin >> source.x;
+    } while((source.x >= 0) && (source.x >= x));
+    
+    do {
+        cout << "Enter y coordinate of source\n";
+        cin >> source.y;
+    } while ((source.y >= 0) && (source.y >= y));
+    
+    do {
+        cout << "Enter z coordinate of source\n";
+        cin >> source.z;
+    } while((source.z > 0) && (source.z != 1) && (source.z != 2) && (source.z != 3));
+    
+    do{
+        cout << "Enter x coordinate of target\n";
+        cin >> target.x;
+    } while((target.x >= 0) && (target.x >= x));
+    
+    do {
+        cout << "Enter y coordinate of target\n";
+        cin >> target.y;
+    } while ((target.y >= 0) && (target.y >= y));
+    
+    do {
+        cout << "Enter z coordinate of target\n";
+        cin >> target.z;
+    } while((target.z > 0) && (target.z != 1) && (target.z != 2) && (target.z != 3));
 }
 
 void printMatrix (vector<vector<int>> m, int x, int y){
@@ -108,15 +113,17 @@ void printMatrix (vector<vector<int>> m, int x, int y){
     }
 }
 
-coord traverse(vector <vector<int>> l, vector<vector<int>> &m, int x, int y, coord s, coord t){
+coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
     //vertical
     coord newSource;
     if (s.z  == 2){
-        m[s.x][s.y] = -s.z;
+        l[s.x][s.y] = route;
         if (t.x > s.x){
             for (int i = s.x + 1; i<=t.x; i++){
-                if (l[i][s.y] == 0)
-                    m[i][s.y] = - s.z;
+                if (l[i][s.y] == 0){
+                    l[i][s.y] = route;
+                    cells ++;
+                }
                 else{
                     newSource.x = i-1;
                     newSource.y = s.y;
@@ -127,10 +134,11 @@ coord traverse(vector <vector<int>> l, vector<vector<int>> &m, int x, int y, coo
         }
         else {
             for (int i = s.x + 1; i>t.x; i--){
-                if (l[i][s.y] == 0)
-                    m[i][s.y] = - s.z;
+                if (l[i][s.y] == 0){
+                    l[i][s.y] = route;
+                    cells ++;
+                }
                 else{
-//                    coord newSource;
                     newSource.x = i-1;
                     newSource.y = s.y;
                     newSource.z = s.z;
@@ -144,13 +152,14 @@ coord traverse(vector <vector<int>> l, vector<vector<int>> &m, int x, int y, coo
     }
     //horizontal
     else{
-        m[s.x][s.y] = -s.z;
+        l[s.x][s.y] = route;
         if (t.y > s.y){
             for (int j = s.y + 1; j <= t.y; j++){
-                if (l[s.x][j] == 0)
-                    m[s.x][j] = - s.z;
+                if (l[s.x][j] == 0){
+                    l[s.x][j] = route;
+                    cells ++;
+                }
                 else{
-//                    coord newSource;
                     newSource.x = s.x;
                     newSource.y = j-1;
                     newSource.z = s.z;
@@ -160,10 +169,11 @@ coord traverse(vector <vector<int>> l, vector<vector<int>> &m, int x, int y, coo
         }
         else {
             for (int j = s.y + 1; j >= t.y; j--){
-                if (l[s.x][j] == 0)
-                    m[s.x][j] = - s.z;
+                if (l[s.x][j] == 0){
+                    l[s.x][j] = route;
+                    cells ++;
+                }
                 else{
-//                    coord newSource;
                     newSource.x = s.x;
                     newSource.y = j-1;
                     newSource.z = s.z;
@@ -175,26 +185,28 @@ coord traverse(vector <vector<int>> l, vector<vector<int>> &m, int x, int y, coo
         newSource.y = t.y;
         newSource.z = s.z;
     }
-//    coord newSource;
-//    newSource.x = newSource.y = newSource.z = -100;
     return newSource;
 }
 
-void noFlooding (vector<vector<int>> l1, vector<vector<int>> l2, vector<vector<int>> l3, vector<vector<int>> &m, int x, int y, coord newSource, coord target){
+void noFlooding (vector<vector<int>> l1, vector<vector<int>> l2, vector<vector<int>> l3, int x, int y, coord newSource, coord target){
     int count = 0;
     while (count < 3){
         switch(newSource.z){
-            case 1: newSource = traverse(l1, m, x, y, newSource, target);
+            case 1: newSource = traverse(l1, x, y, newSource, target);
                 break;
-            case 2:newSource = traverse(l2, m, x, y, newSource, target);
+            case 2:newSource = traverse(l2, x, y, newSource, target);
                 break;
             case 3:
-                newSource = traverse(l3, m, x, y, newSource, target);
+                newSource = traverse(l3, x, y, newSource, target);
                 break;
             default:
                 break;
         }
-        printMatrix (m, x, y );
+        printMatrix (l1, x, y );
+        cout << endl << endl;
+        printMatrix (l2, x, y );
+        cout << endl << endl;
+        printMatrix (l3, x, y );
         cout << endl << endl;
         cout << newSource.x << endl;
         cout << newSource.y << endl;
@@ -308,20 +320,22 @@ void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
     }
 }
 
-int backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, vector<vector<int>> &m, int x, int y, coord source, coord target, int via, coord source1){
-    int cells = 0;
+void backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1){
     int count = 0;
     switch (target.z){
         case(1): {
             count = l1[target.x][target.y];
+            cells ++;
         }
             break;
         case(2): {
             count = l2[target.x][target.y];
+            cells ++;
         }
             break;
         case(3): {
             count = l3[target.x][target.y];
+            cells ++;
         }
             break;
     }
@@ -331,65 +345,78 @@ int backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector
     while(i!=source.x | j!=source.y | z!=source.z){
         //horizontal
         if(z==1){
-            if((j-1 > 0) && (l1[i][j-1] == (count - 1))){
-                l1[i][j-1] = -1;
+            if((j-1 > 0) && (l1[i][j-1] == (count - 1)) && (l1[i][j-1] >= 0)){
+                l1[i][j-1] = route;
                 j--;
                 count--;
+                cells ++;
             }
-            else if ((j+1 > y) && (l1[i][j+1] == (count - 1))){
-                l1[i][j+1] = -1;
+            else if ((j+1 > y) && (l1[i][j+1] == (count - 1)) && (l1[i][j+1] >= 0)){
+                l1[i][j+1] = route;
                 j++;
                 count--;
+                cells ++;
             }
-            else if(l2[i][j] == (count-via)){
+            else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){
                 z = 2;
                 count -= via;
                 l2[i][j] = v12;
                 l1[i][j] = v12;
+                cells ++;
+                cells ++;
             }
         }
         else if (z == 3){
-            if((j-1 > 0) && (l3[i][j-1] == (count - 1))){
-                l3[i][j-1] = -1;
+            if((j-1 > 0) && (l3[i][j-1] == (count - 1)) && (l3[i][j-1] >= 0)){
+                l3[i][j-1] = route;
                 j--;
                 count--;
+                cells ++;
             }
-            else if ((j+1 > y) && (l3[i][j+1] == (count - 1))){
-                l3[i][j+1] = -1;
+            else if ((j+1 > y) && (l3[i][j+1] == (count - 1)) && (l3[i][j+1] >= 0)){
+                l3[i][j+1] = route;
                 j++;
                 count--;
+                cells ++;
             }
-            else if(l2[i][j] == (count-via)){
+            else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){
                 z = 2;
                 count-=via;
                 l2[i][j] = v23;
                 l3[i][j] = v23;
+                cells ++;
+                cells ++;
             }
         }
         //vertical
         else {
-            if((i-1 > 0) && (l2[i-1][j] == (count - 1))){
-                l2[i-1][j] = -1;
+            if((i-1 > 0) && (l2[i-1][j] == (count - 1)) && (l2[i-1][j] >= 0)){
+                l2[i-1][j] = route;
                 i--;
                 count--;
+                cells ++;
             }
-            else if ((i+1 < x) && (l2[i+1][j] == (count - 1))){
-                l2[i+1][j] = -1;
+            else if ((i+1 < x) && (l2[i+1][j] == (count - 1)) && (l2[i+1][j] >= 0)){
+                l2[i+1][j] = route;
                 i++;
                 count--;
+                cells ++;
             }
-            else if(l3[i][j] == (count-via)){
-                l3[i][j] = -1;
+            else if(l3[i][j] == (count-via) && (l3[i][j] >= 0)){
                 z = 3;
                 count-=via;
                 l3[i][j] = v23;
                 l2[i][j] = v23;
+                cells ++;
+                cells ++;
             }
-            else if(l1[i][j] == (count-via)){
+            else if(l1[i][j] == (count-via) && (l1[i][j] >= 0)){
                 l1[i][j] = v12;
                 l2[i][j] = v12;
                 z = 1;
                 count-=via;
+                cells ++;
+                cells ++;
             }
         }
     }
@@ -397,6 +424,7 @@ int backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector
         case(1): {
             l1[source.x][source.y] = v12;
             l2[source.x][source.y] = v12;
+            cells ++;
         }
             break;
         case(2): {
@@ -404,11 +432,13 @@ int backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector
                 case(1):{
                     l1[source.x][source.y] = v12;
                     l2[source.x][source.y] = v12;
+                    cells ++;
                 }
                     break;
                 case(3):{
                     l3[source.x][source.y] = v23;
                     l2[source.x][source.y] = v23;
+                    cells ++;
                 }
                     break;
             }
@@ -417,13 +447,13 @@ int backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector
         case(3): {
             l3[source.x][source.y] = v23;
             l2[source.x][source.y] = v23;
+            cells ++;
         }
             break;
     }
-    return cells;
 }
 
-void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, vector<vector<int>> &m, int x, int y){
+void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y){
     for (int i=0; i<x; i++){
         for(int j=0; j<y; j++){
             if(l1[i][j] > 0)
@@ -433,5 +463,54 @@ void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
             if(l3[i][j] > 0)
                 l3[i][j] = 0;
         }
+    }
+}
+
+void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via){
+    l1[4][7] = -7;
+    coord newSource;
+    
+    switch (source.z){
+        case(1): newSource = traverse(l1, x, y, source, target);
+            break;
+        case (2): newSource = traverse(l2, x, y, source, target);
+            break;
+        case (3): newSource = traverse(l3, x, y, source, target);
+            break;
+    }
+    int count0 = 0;
+    if ((newSource.x == target.x) && (newSource.y == target.y) && (newSource.z == target.z))
+        cout << "DONEEEE" << endl;
+    else {
+        if(newSource.z < target.z){
+            newSource.z = ((newSource.z) % 3 )+ 1;
+            count0 = 1 + via;
+        }
+        else if (newSource.z > target.z){
+            newSource.z = ((newSource.z - 1) % 3 );
+            count0 = 1 + via;
+        }
+        else if ((newSource.z == target.z) && ((target.z == 1) || (target.z == 3)) && (newSource.x != target.x)){
+            newSource.z = 2;
+            count0 = 1 + via;
+        }
+        else if ((newSource.z == target.z) && (target.z == 2) && (newSource.y != target.y)){
+            newSource.z = ((newSource.z) % 3 )+ 1;
+            count0 = 1 + via;
+        }
+
+        cout << "New source is " << newSource.x << " " << newSource.y << " " << newSource.z << endl;
+       
+        flood(l1, l2, l3, x, y, newSource, target, via, count0);
+        
+        backTracking(l1, l2, l3, x, y, newSource, target, via, source);
+        backToLife(l1, l2, l3, x, y);
+        
+        printMatrix(l1, x, y);
+        cout << endl << endl;
+        printMatrix(l2, x, y);
+        cout << endl << endl;
+        printMatrix(l3, x, y);
+        cout << endl << endl;
     }
 }
