@@ -232,11 +232,14 @@ void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
             l3[newSource.x][newSource.y] = count;
             break;
     }
+    int imin, imax, jmin, jmax;
+    imin = imax = newSource.x;
+    jmin = jmax = newSource.y;
     while (!done && (count < (x+y+2*via))){
         done1 = true; done2 = true; done3 = true;
         done = false;
-                for (int i=0; i<x; i++){
-                    for (int j = 0; j<y; j++){
+                for (int i=imin; i<= imax; i++){
+                    for (int j = jmin; j <= jmax; j++){
                         if (l1[i][j] == count){
                             done1 = false;
                             if(l2[i][j] == 0){
@@ -250,11 +253,13 @@ void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
                                 l3[i][j] = count + 2 * via;
                             }
                             if((j+1<y) && (l1[i][j+1] == 0)){
+                                jmax = j+1;
                                 l1[i][j+1] = count+1;
                                 if((i == target.x) && ((j+1) == target.y) && (target.z == 1))
                                     done = true;
                             }
                             if((j-1>=0) && (l1[i][j-1] == 0)){
+                                jmin = j-1;
                                 l1[i][j-1] = count+1;
                                 if((i == target.x) && ((j-1) == target.y) && (target.z == 1))
                                     done = true;
@@ -275,11 +280,13 @@ void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
                                     done = true;
                             }
                             if((i+1<x) && (l2[i+1][j] == 0)){
+                                imax = i + 1;
                                 l2[i+1][j] = count+1;
                                 if((j == target.y) && ((i+1) == target.x) && (target.z == 2))
                                     done = true;
                             }
                             if((i-1>=0) && (l2[i-1][j] == 0)){
+                                imin = i-1;
                                 l2[i-1][j] = count+1;
                                 if((j == target.y) && ((i-1) == target.x) && (target.z == 2))
                                     done = true;
@@ -299,11 +306,13 @@ void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
                                 l1[i][j] = count + 2 * via;
                             }
                             if((j+1<y) && (l3[i][j+1] == 0)){
+                                jmax = j + 1;
                                 l3[i][j+1] = count+1;
                                 if((i == target.x) && ((j+1) == target.y) && (target.z == 3))
                                     done = true;
                             }
                             if((j-1>=0) && (l3[i][j-1] == 0)){
+                                jmin = j-1;
                                 l3[i][j-1] = count+1;
                                 if((i == target.x) && ((j-1) == target.y) && (target.z == 3))
                                     done = true;
@@ -315,8 +324,6 @@ void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
             cout << endl << count << endl;
         }
         count++;
-        if (count == 22)
-            cout << "hello" << endl;
     }
 }
 
@@ -499,7 +506,7 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
             count0 = 1 + via;
         }
 
-        cout << "New source is " << newSource.x << " " << newSource.y << " " << newSource.z << endl;
+//        cout << "New source is " << newSource.x << " " << newSource.y << " " << newSource.z << endl;
        
         flood(l1, l2, l3, x, y, newSource, target, via, count0);
         
