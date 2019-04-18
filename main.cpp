@@ -20,13 +20,14 @@ int cells = 0;
 int route = -10;
 
 //function declarations
-void input(coord &source, coord &target, int x, int y);
+bool input(coord &source, coord &target, int x, int y);
 void printMatrix (vector<vector<int>> m, int x, int y);
 coord traverse(vector <vector<int>> &l,  int x, int y, coord s, coord t);
 void noFlooding (vector <vector<int>> l1, vector <vector<int>> l2, vector <vector<int>> l3, int x, int y, coord newSource, coord target);
-void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0);
-void backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1);
+bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0);
+bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1);
 void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y);
+void undoTraversal(vector<vector<int>> &l, int x, int y, coord s, coord t);
 void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via);
 
 //main
@@ -62,7 +63,8 @@ int main(){
     source.x = source.y = source.z = target.x = target.y = target.z = 0;
     
     while (source.x >= 0 && source.y >= 0 && source.z >= 0 && target.x >= 0 && target.y >= 0 && target.z >= 0){
-        input(source, target, x, y);
+        if (!input(source, target, x, y))
+            return 0;
         if (source.x >= 0 && source.y >= 0 && source.z >= 0 && target.x >= 0 && target.y >= 0 && target.z >= 0)
             classicalImplementation(l1, l2, l3, x, y, source, target, via);
         route--;
@@ -72,36 +74,55 @@ int main(){
 }
 
 //function definitions
-void input(coord &source, coord &target, int x, int y){
+bool input(coord &source, coord &target, int x, int y){
     do{
         cout << "Enter x coordinate of source\n";
         cin >> source.x;
     } while((source.x >= 0) && (source.x >= x));
+    
+    if(source.x < 0 )
+        return false;
     
     do {
         cout << "Enter y coordinate of source\n";
         cin >> source.y;
     } while ((source.y >= 0) && (source.y >= y));
     
+    if(source.y < 0 )
+        return false;
+    
     do {
         cout << "Enter z coordinate of source\n";
         cin >> source.z;
     } while((source.z > 0) && (source.z != 1) && (source.z != 2) && (source.z != 3));
+    
+    if(source.z < 0 )
+        return false;
     
     do{
         cout << "Enter x coordinate of target\n";
         cin >> target.x;
     } while((target.x >= 0) && (target.x >= x));
     
+    if(target.x < 0 )
+        return false;
+    
     do {
         cout << "Enter y coordinate of target\n";
         cin >> target.y;
     } while ((target.y >= 0) && (target.y >= y));
     
+    if(target.y < 0 )
+        return false;
+    
     do {
         cout << "Enter z coordinate of target\n";
         cin >> target.z;
     } while((target.z > 0) && (target.z != 1) && (target.z != 2) && (target.z != 3));
+    
+    if(target.z < 0 )
+        return false;
+    return true;
 }
 
 void printMatrix (vector<vector<int>> m, int x, int y){
@@ -217,10 +238,8 @@ void noFlooding (vector<vector<int>> l1, vector<vector<int>> l2, vector<vector<i
     }
 }
 
-void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0){
+bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0){
     int count = count0;
-    bool done1, done2, done3 = true;
-    bool done = false;
     switch(newSource.z){
         case (1):
             l1[newSource.x][newSource.y] = count;
@@ -235,99 +254,97 @@ void flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
     int imin, imax, jmin, jmax;
     imin = imax = newSource.x;
     jmin = jmax = newSource.y;
-    while (!done && (count < (x+y+2*via))){
-        done1 = true; done2 = true; done3 = true;
-        done = false;
-                for (int i=imin; i<= imax; i++){
-                    for (int j = jmin; j <= jmax; j++){
+    while (count < (x+y+2*via)){
+//    while(count < 100){
+//                for (int i=imin; i<= imax; i++){
+//                    for (int j = jmin; j <= jmax; j++){
+        for (int i = 0; i<x; i++){
+            for (int j = 0; j<y; j++){
                         if (l1[i][j] == count){
-                            done1 = false;
                             if(l2[i][j] == 0){
                                 l2[i][j] = count + via;
                                 if((i == target.x) && (j == target.y) && (target.z == 2))
-                                    done = true;
+                                    return true;
                             }
                             if(l3[i][j] == 0){
                                 if((j == target.y) && (i == target.x) && (target.z == 3))
-                                    done = true;
+                                    return true;
                                 l3[i][j] = count + 2 * via;
                             }
                             if((j+1<y) && (l1[i][j+1] == 0)){
                                 jmax = j+1;
                                 l1[i][j+1] = count+1;
                                 if((i == target.x) && ((j+1) == target.y) && (target.z == 1))
-                                    done = true;
+                                    return true;
                             }
                             if((j-1>=0) && (l1[i][j-1] == 0)){
                                 jmin = j-1;
                                 l1[i][j-1] = count+1;
                                 if((i == target.x) && ((j-1) == target.y) && (target.z == 1))
-                                    done = true;
+                                    return true;
                             }
                         }
                         
                         
                         if (l2[i][j] == count){
-                            done2 = false;
                             if(l1[i][j] == 0){
                                 l1[i][j] = count + via;
                                 if((j == target.y) && (i == target.x) && (target.z == 1))
-                                    done = true;
+                                   return true;
                             }
                             if(l3[i][j] == 0){
                                 l3[i][j] = count + via;
                                 if((j == target.y) && (i == target.x) && (target.z == 3))
-                                    done = true;
+                                    return true;
                             }
                             if((i+1<x) && (l2[i+1][j] == 0)){
                                 imax = i + 1;
                                 l2[i+1][j] = count+1;
                                 if((j == target.y) && ((i+1) == target.x) && (target.z == 2))
-                                    done = true;
+                                    return true;
                             }
                             if((i-1>=0) && (l2[i-1][j] == 0)){
                                 imin = i-1;
                                 l2[i-1][j] = count+1;
                                 if((j == target.y) && ((i-1) == target.x) && (target.z == 2))
-                                    done = true;
+                                    return true;
                             }
                         }
                         
                         if (l3[i][j] == count){
-                            done1 = false;
                             if(l2[i][j] == 0){
                                 l2[i][j] = count + via;
                                 if((i == target.x) && (j == target.y) && (target.z == 2))
-                                    done = true;
+                                    return true;
                             }
                             if(l1[i][j] == 0){
                                 if((i == target.x) && (j == target.y) && (target.z == 1))
-                                    done = true;
+                                    return true;
                                 l1[i][j] = count + 2 * via;
                             }
                             if((j+1<y) && (l3[i][j+1] == 0)){
                                 jmax = j + 1;
                                 l3[i][j+1] = count+1;
                                 if((i == target.x) && ((j+1) == target.y) && (target.z == 3))
-                                    done = true;
+                                    return true;
                             }
                             if((j-1>=0) && (l3[i][j-1] == 0)){
                                 jmin = j-1;
                                 l3[i][j-1] = count+1;
                                 if((i == target.x) && ((j-1) == target.y) && (target.z == 3))
-                                    done = true;
+                                    return true;
                             }
                         }
                     }
                 }
-        if (done){
-            cout << endl << count << endl;
-        }
         count++;
+        if (count == 28)
+            cout << "28" << endl;
     }
+    return false;
 }
 
-void backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1){
+bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1){
     int count = 0;
     switch (target.z){
         case(1): {
@@ -346,6 +363,8 @@ void backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
         }
             break;
     }
+    if (count <= 0)
+        return false;
     int i = target.x;
     int j = target.y;
     int z = target.z;
@@ -367,8 +386,10 @@ void backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
             else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){
                 z = 2;
                 count -= via;
-                l2[i][j] = v12;
-                l1[i][j] = v12;
+                l2[i][j] = route;
+                l1[i][j] = route;
+//                l2[i][j] = v12;
+//                l1[i][j] = v12;
                 cells ++;
                 cells ++;
             }
@@ -389,8 +410,10 @@ void backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
             else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){
                 z = 2;
                 count-=via;
-                l2[i][j] = v23;
-                l3[i][j] = v23;
+//                l2[i][j] = v23;
+//                l3[i][j] = v23;
+                l2[i][j] = route;
+                l3[i][j] = route;
                 cells ++;
                 cells ++;
             }
@@ -412,14 +435,18 @@ void backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
             else if(l3[i][j] == (count-via) && (l3[i][j] >= 0)){
                 z = 3;
                 count-=via;
-                l3[i][j] = v23;
-                l2[i][j] = v23;
+//                l3[i][j] = v23;
+//                l2[i][j] = v23;
+                l3[i][j] = route;
+                l2[i][j] = route;
                 cells ++;
                 cells ++;
             }
             else if(l1[i][j] == (count-via) && (l1[i][j] >= 0)){
-                l1[i][j] = v12;
-                l2[i][j] = v12;
+//                l1[i][j] = v12;
+//                l2[i][j] = v12;
+                l1[i][j] = route;
+                l2[i][j] = route;
                 z = 1;
                 count-=via;
                 cells ++;
@@ -427,37 +454,38 @@ void backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
             }
         }
     }
-    switch (source.z){
-        case(1): {
-            l1[source.x][source.y] = v12;
-            l2[source.x][source.y] = v12;
-            cells ++;
-        }
-            break;
-        case(2): {
-            switch(source1.z){
-                case(1):{
-                    l1[source.x][source.y] = v12;
-                    l2[source.x][source.y] = v12;
-                    cells ++;
-                }
-                    break;
-                case(3):{
-                    l3[source.x][source.y] = v23;
-                    l2[source.x][source.y] = v23;
-                    cells ++;
-                }
-                    break;
-            }
-        }
-            break;
-        case(3): {
-            l3[source.x][source.y] = v23;
-            l2[source.x][source.y] = v23;
-            cells ++;
-        }
-            break;
-    }
+//    switch (source.z){
+//        case(1): {
+//            l1[source.x][source.y] = v12;
+//            l2[source.x][source.y] = v12;
+//            cells ++;
+//        }
+//            break;
+//        case(2): {
+//            switch(source1.z){
+//                case(1):{
+//                    l1[source.x][source.y] = v12;
+//                    l2[source.x][source.y] = v12;
+//                    cells ++;
+//                }
+//                    break;
+//                case(3):{
+//                    l3[source.x][source.y] = v23;
+//                    l2[source.x][source.y] = v23;
+//                    cells ++;
+//                }
+//                    break;
+//            }
+//        }
+//            break;
+//        case(3): {
+//            l3[source.x][source.y] = v23;
+//            l2[source.x][source.y] = v23;
+//            cells ++;
+//        }
+//            break;
+//    }
+    return true;
 }
 
 void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y){
@@ -474,7 +502,7 @@ void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
 }
 
 void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via){
-    l1[4][7] = -7;
+//    l1[4][7] = -7;
     coord newSource;
     
     switch (source.z){
@@ -509,15 +537,92 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
 //        cout << "New source is " << newSource.x << " " << newSource.y << " " << newSource.z << endl;
        
         flood(l1, l2, l3, x, y, newSource, target, via, count0);
-        
-        backTracking(l1, l2, l3, x, y, newSource, target, via, source);
-        backToLife(l1, l2, l3, x, y);
-        
+        cout << "FLODDING" << endl;
         printMatrix(l1, x, y);
         cout << endl << endl;
         printMatrix(l2, x, y);
         cout << endl << endl;
         printMatrix(l3, x, y);
         cout << endl << endl;
+        if (backTracking(l1, l2, l3, x, y, newSource, target, via, source)){
+            backToLife(l1, l2, l3, x, y);
+        
+                cout << "BACKTRACKING" << endl;
+                printMatrix(l1, x, y);
+                cout << endl << endl;
+                printMatrix(l2, x, y);
+                cout << endl << endl;
+                printMatrix(l3, x, y);
+                cout << endl << endl;
+        } else {
+            cout << "No Path available" << endl;
+            backToLife(l1, l2, l3, x, y);
+            cells = 0;
+            switch (source.z){
+                case(1): undoTraversal(l1, x, y, source, newSource);
+                    break;
+                case (2): undoTraversal(l2, x, y, source, newSource);
+                    break;
+                case (3): undoTraversal(l3, x, y, source, newSource);
+                    break;
+            }
+            route--;
+            printMatrix(l1, x, y);
+            cout << endl << endl;
+            printMatrix(l2, x, y);
+            cout << endl << endl;
+            printMatrix(l3, x, y);
+            cout << endl << endl;
+        }
+//        } else{
+//            cout << "No Path available" << endl;
+//            cells = 0;
+//            switch (source.z){
+//                case(1): undoTraversal(l1, x, y, source, newSource);
+//                    break;
+//                case (2): undoTraversal(l2, x, y, source, newSource);
+//                    break;
+//                case (3): undoTraversal(l3, x, y, source, newSource);
+//                    break;
+//            }
+//            route--;
+//        }
+    }
+}
+
+void undoTraversal(vector<vector<int>> &l,  int x, int y, coord s, coord t){
+    if (s.z  == 2){
+        l[s.x][s.y] = route;
+        if (t.x > s.x){
+            for (int i = s.x + 1; i<=t.x; i++){
+                if (l[i][s.y] == route){
+                    l[i][s.y] = 0;
+                }
+            }
+        }
+        else {
+            for (int i = s.x + 1; i>=t.x; i--){
+                if (l[i][s.y] == route){
+                    l[i][s.y] = 0;
+                }
+            }
+        }
+    }
+    //horizontal
+    else{
+        if (t.y > s.y){
+            for (int j = s.y + 1; j <= t.y; j++){
+                if (l[s.x][j] == route){
+                    l[s.x][j] = 0;
+                }
+            }
+        }
+        else {
+            for (int j = s.y + 1; j >= t.y; j--){
+                if (l[s.x][j] == route){
+                    l[s.x][j] = 0;
+                }
+            }
+        }
     }
 }
