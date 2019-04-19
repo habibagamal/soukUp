@@ -17,7 +17,9 @@ struct coord{int x; int y; int z;};
 
 //global variables
 int cells = 0;
+int vias;
 int route = -10;
+int s_value, t_value;
 
 //function declarations
 bool input(coord &source, coord &target, int x, int y);
@@ -139,6 +141,7 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
     coord newSource;
     if (s.z  == 2){
         l[s.x][s.y] = route;
+        cells++;
         if (t.x > s.x){
             for (int i = s.x + 1; i<=t.x; i++){
                 if (l[i][s.y] == 0){
@@ -154,7 +157,7 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
             }
         }
         else {
-            for (int i = s.x + 1; i>t.x; i--){
+            for (int i = s.x - 1; i >= t.x; i--){
                 if (l[i][s.y] == 0){
                     l[i][s.y] = route;
                     cells ++;
@@ -174,6 +177,7 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
     //horizontal
     else{
         l[s.x][s.y] = route;
+        cells++;
         if (t.y > s.y){
             for (int j = s.y + 1; j <= t.y; j++){
                 if (l[s.x][j] == 0){
@@ -189,7 +193,7 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
             }
         }
         else {
-            for (int j = s.y + 1; j >= t.y; j--){
+            for (int j = s.y - 1; j >= t.y; j--){
                 if (l[s.x][j] == 0){
                     l[s.x][j] = route;
                     cells ++;
@@ -256,90 +260,120 @@ bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
     jmin = jmax = newSource.y;
     while (count < (x+y+2*via)){
 //    while(count < 100){
-//                for (int i=imin; i<= imax; i++){
+//                for (int i= imin; i<= imax; i++){
 //                    for (int j = jmin; j <= jmax; j++){
         for (int i = 0; i<x; i++){
             for (int j = 0; j<y; j++){
                         if (l1[i][j] == count){
+                            
+                            if((i == target.x) && (j == target.y) && (target.z == 2)){
+                                l2[i][j] = count + via;
+                                return true;
+                            }
                             if(l2[i][j] == 0){
                                 l2[i][j] = count + via;
-                                if((i == target.x) && (j == target.y) && (target.z == 2))
-                                    return true;
                             }
-                            if(l3[i][j] == 0){
-                                if((j == target.y) && (i == target.x) && (target.z == 3))
-                                    return true;
-                                l3[i][j] = count + 2 * via;
+                            
+                            if((i == target.x) && ((j+1) == target.y) && (target.z == 1)){
+                                l1[i][j+1] = count+1;
+                                return true;
                             }
                             if((j+1<y) && (l1[i][j+1] == 0)){
                                 jmax = j+1;
+//                                i= imin;
                                 l1[i][j+1] = count+1;
-                                if((i == target.x) && ((j+1) == target.y) && (target.z == 1))
-                                    return true;
+                            }
+                            
+                            if((i == target.x) && ((j-1) == target.y) && (target.z == 1)){
+                                l1[i][j-1] = count+1;
+                                return true;
                             }
                             if((j-1>=0) && (l1[i][j-1] == 0)){
                                 jmin = j-1;
+//                                i = imin;
+//                                j = jmin;
                                 l1[i][j-1] = count+1;
-                                if((i == target.x) && ((j-1) == target.y) && (target.z == 1))
-                                    return true;
                             }
                         }
                         
                         
                         if (l2[i][j] == count){
+                            
+                            if((j == target.y) && (i == target.x) && (target.z == 1)){
+                                l1[i][j] = count + via;
+                                return true;
+                            }
                             if(l1[i][j] == 0){
                                 l1[i][j] = count + via;
-                                if((j == target.y) && (i == target.x) && (target.z == 1))
-                                   return true;
+                                
+                            }
+                            
+                            if((j == target.y) && (i == target.x) && (target.z == 3)){
+                                l3[i][j] = count + via;
+                                return true;
                             }
                             if(l3[i][j] == 0){
                                 l3[i][j] = count + via;
-                                if((j == target.y) && (i == target.x) && (target.z == 3))
-                                    return true;
+                            }
+                            
+                            if((j == target.y) && ((i+1) == target.x) && (target.z == 2)){
+                                l2[i+1][j] = count+1;
+                                return true;
                             }
                             if((i+1<x) && (l2[i+1][j] == 0)){
                                 imax = i + 1;
+//                                j = jmin;
                                 l2[i+1][j] = count+1;
-                                if((j == target.y) && ((i+1) == target.x) && (target.z == 2))
-                                    return true;
+                            }
+                            
+                            if((j == target.y) && ((i-1) == target.x) && (target.z == 2)){
+                                l2[i-1][j] = count+1;
+                                return true;
                             }
                             if((i-1>=0) && (l2[i-1][j] == 0)){
-                                imin = i-1;
-                                l2[i-1][j] = count+1;
-                                if((j == target.y) && ((i-1) == target.x) && (target.z == 2))
-                                    return true;
+                                    imin = i-1;
+                                    //                                j = jmin;
+                                    //                                i = imin;
+                                    l2[i-1][j] = count+1;
                             }
                         }
                         
                         if (l3[i][j] == count){
+                    
+                            if((i == target.x) && (j == target.y) && (target.z == 2)){
+                                l2[i][j] = count + via;
+                                return true;
+                            }
                             if(l2[i][j] == 0){
                                 l2[i][j] = count + via;
-                                if((i == target.x) && (j == target.y) && (target.z == 2))
-                                    return true;
                             }
-                            if(l1[i][j] == 0){
-                                if((i == target.x) && (j == target.y) && (target.z == 1))
-                                    return true;
-                                l1[i][j] = count + 2 * via;
+                            
+                            if((i == target.x) && ((j+1) == target.y) && (target.z == 3)){
+                                l3[i][j+1] = count+1;
+                                return true;
                             }
                             if((j+1<y) && (l3[i][j+1] == 0)){
-                                jmax = j + 1;
-                                l3[i][j+1] = count+1;
-                                if((i == target.x) && ((j+1) == target.y) && (target.z == 3))
-                                    return true;
+                                    jmax = j + 1;
+                                    //                                i = imin;
+                                    l3[i][j+1] = count+1;
+                            }
+                            
+                            if((i == target.x) && ((j-1) == target.y) && (target.z == 3)){
+                                l3[i][j-1] = count+1;
+                                return true;
                             }
                             if((j-1>=0) && (l3[i][j-1] == 0)){
-                                jmin = j-1;
-                                l3[i][j-1] = count+1;
-                                if((i == target.x) && ((j-1) == target.y) && (target.z == 3))
-                                    return true;
+                                    jmin = j-1;
+//                                    i = imin;
+//                                    j = jmin;
+                                    l3[i][j-1] = count+1;
                             }
                         }
                     }
                 }
         count++;
-        if (count == 28)
-            cout << "28" << endl;
+//        if (count == 28)
+//            cout << "28" << endl;
     }
     return false;
 }
@@ -349,20 +383,24 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
     switch (target.z){
         case(1): {
             count = l1[target.x][target.y];
+            l1[target.x][target.y] = route;
             cells ++;
         }
             break;
         case(2): {
             count = l2[target.x][target.y];
+            l2[target.x][target.y] = route;
             cells ++;
         }
             break;
         case(3): {
             count = l3[target.x][target.y];
+            l3[target.x][target.y] = route;
             cells ++;
         }
             break;
     }
+
     if (count <= 0)
         return false;
     int i = target.x;
@@ -377,7 +415,7 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 count--;
                 cells ++;
             }
-            else if ((j+1 > y) && (l1[i][j+1] == (count - 1)) && (l1[i][j+1] >= 0)){
+            else if ((j+1 < y) && (l1[i][j+1] == (count - 1)) && (l1[i][j+1] >= 0)){
                 l1[i][j+1] = route;
                 j++;
                 count--;
@@ -392,6 +430,7 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
 //                l1[i][j] = v12;
                 cells ++;
                 cells ++;
+                vias ++;
             }
         }
         else if (z == 3){
@@ -401,7 +440,7 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 count--;
                 cells ++;
             }
-            else if ((j+1 > y) && (l3[i][j+1] == (count - 1)) && (l3[i][j+1] >= 0)){
+            else if ((j+1 < y) && (l3[i][j+1] == (count - 1)) && (l3[i][j+1] >= 0)){
                 l3[i][j+1] = route;
                 j++;
                 count--;
@@ -416,6 +455,7 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 l3[i][j] = route;
                 cells ++;
                 cells ++;
+                vias ++;
             }
         }
         //vertical
@@ -441,6 +481,7 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 l2[i][j] = route;
                 cells ++;
                 cells ++;
+                vias ++;
             }
             else if(l1[i][j] == (count-via) && (l1[i][j] >= 0)){
 //                l1[i][j] = v12;
@@ -451,9 +492,11 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 count-=via;
                 cells ++;
                 cells ++;
+                vias ++;
             }
         }
     }
+
 //    switch (source.z){
 //        case(1): {
 //            l1[source.x][source.y] = v12;
@@ -504,38 +547,75 @@ void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
 void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via){
 //    l1[4][7] = -7;
     coord newSource;
+    cells = 0;
+    vias = 0;
     
     switch (source.z){
-        case(1): newSource = traverse(l1, x, y, source, target);
+        case(1): {
+            s_value = l1[source.x][source.y];
+            newSource = traverse(l1, x, y, source, target);
+        }
             break;
-        case (2): newSource = traverse(l2, x, y, source, target);
+        case (2): {
+            s_value = l2[source.x][source.y];
+            newSource = traverse(l2, x, y, source, target);
+        }
             break;
-        case (3): newSource = traverse(l3, x, y, source, target);
+        case (3): {
+            s_value = l3[source.x][source.y];
+            newSource = traverse(l3, x, y, source, target);
+        }
             break;
     }
-    int count0 = 0;
-    if ((newSource.x == target.x) && (newSource.y == target.y) && (newSource.z == target.z))
-        cout << "DONEEEE" << endl;
+
+    switch (target.z){
+        case(1): {
+            t_value = l1[target.x][target.y];
+        }
+            break;
+        case (2): {
+            t_value = l2[target.x][target.y];
+        }
+            break;
+        case (3): {
+            t_value = l3[target.x][target.y];
+        }
+            break;
+    }
+    
+    
+    int count0 = 1;
+    if ((newSource.x == target.x) && (newSource.y == target.y) && (newSource.z == target.z)){
+        printMatrix(l1, x, y);
+        cout << endl << endl;
+        printMatrix(l2, x, y);
+        cout << endl << endl;
+        printMatrix(l3, x, y);
+        cout << endl << endl;
+    }
     else {
         if(newSource.z < target.z){
             newSource.z = ((newSource.z) % 3 )+ 1;
+            vias++;
             count0 = 1 + via;
         }
         else if (newSource.z > target.z){
             newSource.z = ((newSource.z - 1) % 3 );
+            vias++;
             count0 = 1 + via;
         }
         else if ((newSource.z == target.z) && ((target.z == 1) || (target.z == 3)) && (newSource.x != target.x)){
             newSource.z = 2;
+            vias++;
             count0 = 1 + via;
         }
         else if ((newSource.z == target.z) && (target.z == 2) && (newSource.y != target.y)){
             newSource.z = ((newSource.z) % 3 )+ 1;
             count0 = 1 + via;
+            vias++;
         }
 
 //        cout << "New source is " << newSource.x << " " << newSource.y << " " << newSource.z << endl;
-       
         flood(l1, l2, l3, x, y, newSource, target, via, count0);
         cout << "FLODDING" << endl;
         printMatrix(l1, x, y);
@@ -547,13 +627,14 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
         if (backTracking(l1, l2, l3, x, y, newSource, target, via, source)){
             backToLife(l1, l2, l3, x, y);
         
-                cout << "BACKTRACKING" << endl;
-                printMatrix(l1, x, y);
-                cout << endl << endl;
-                printMatrix(l2, x, y);
-                cout << endl << endl;
-                printMatrix(l3, x, y);
-                cout << endl << endl;
+            cout << "BACKTRACKING" << endl;
+            printMatrix(l1, x, y);
+            cout << endl << endl;
+            printMatrix(l2, x, y);
+            cout << endl << endl;
+            printMatrix(l3, x, y);
+            cout << endl << endl;
+            cout << "Cost = " << (cells + vias * via) << endl;
         } else {
             cout << "No Path available" << endl;
             backToLife(l1, l2, l3, x, y);
@@ -592,7 +673,6 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
 
 void undoTraversal(vector<vector<int>> &l,  int x, int y, coord s, coord t){
     if (s.z  == 2){
-        l[s.x][s.y] = route;
         if (t.x > s.x){
             for (int i = s.x + 1; i<=t.x; i++){
                 if (l[i][s.y] == route){
@@ -625,4 +705,6 @@ void undoTraversal(vector<vector<int>> &l,  int x, int y, coord s, coord t){
             }
         }
     }
+    l[s.x][s.y] = s_value;
+    l[t.x][t.y] = t_value;
 }
