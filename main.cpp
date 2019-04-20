@@ -285,11 +285,11 @@ bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
     imin = imax = newSource.x;
     jmin = jmax = newSource.y;
    
-//    while(count < 100){
+    while(count < INT_MAX){
 //                for (int i= imin; i<= imax; i++){
 //                    for (int j = jmin; j <= jmax; j++){
     
-     while (count < (x+y+2*via)){ //maximum count
+//     while (count < (x+y+2*via)){ //maximum count
         for (int i = 0; i<x; i++){
             for (int j = 0; j<y; j++){
                         if (l1[i][j] == count){ //check if cell in l1 == count
