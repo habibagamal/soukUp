@@ -141,12 +141,10 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
     coord newSource;
     if (s.z  == 2){
         l[s.x][s.y] = route;
-        cells++;
         if (t.x > s.x){
             for (int i = s.x + 1; i<=t.x; i++){
                 if (l[i][s.y] == 0){
                     l[i][s.y] = route;
-                    cells ++;
                 }
                 else{
                     newSource.x = i-1;
@@ -160,7 +158,6 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
             for (int i = s.x - 1; i >= t.x; i--){
                 if (l[i][s.y] == 0){
                     l[i][s.y] = route;
-                    cells ++;
                 }
                 else{
                     newSource.x = i-1;
@@ -177,12 +174,10 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
     //horizontal
     else{
         l[s.x][s.y] = route;
-        cells++;
         if (t.y > s.y){
             for (int j = s.y + 1; j <= t.y; j++){
                 if (l[s.x][j] == 0){
                     l[s.x][j] = route;
-                    cells ++;
                 }
                 else{
                     newSource.x = s.x;
@@ -196,7 +191,6 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
             for (int j = s.y - 1; j >= t.y; j--){
                 if (l[s.x][j] == 0){
                     l[s.x][j] = route;
-                    cells ++;
                 }
                 else{
                     newSource.x = s.x;
@@ -384,19 +378,16 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
         case(1): {
             count = l1[target.x][target.y];
             l1[target.x][target.y] = route;
-            cells ++;
         }
             break;
         case(2): {
             count = l2[target.x][target.y];
             l2[target.x][target.y] = route;
-            cells ++;
         }
             break;
         case(3): {
             count = l3[target.x][target.y];
             l3[target.x][target.y] = route;
-            cells ++;
         }
             break;
     }
@@ -413,13 +404,11 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 l1[i][j-1] = route;
                 j--;
                 count--;
-                cells ++;
             }
             else if ((j+1 < y) && (l1[i][j+1] == (count - 1)) && (l1[i][j+1] >= 0)){
                 l1[i][j+1] = route;
                 j++;
                 count--;
-                cells ++;
             }
             else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){
                 z = 2;
@@ -428,8 +417,6 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 l1[i][j] = route;
 //                l2[i][j] = v12;
 //                l1[i][j] = v12;
-                cells ++;
-                cells ++;
                 vias ++;
             }
         }
@@ -438,13 +425,11 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 l3[i][j-1] = route;
                 j--;
                 count--;
-                cells ++;
             }
             else if ((j+1 < y) && (l3[i][j+1] == (count - 1)) && (l3[i][j+1] >= 0)){
                 l3[i][j+1] = route;
                 j++;
                 count--;
-                cells ++;
             }
             else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){
                 z = 2;
@@ -453,8 +438,6 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
 //                l3[i][j] = v23;
                 l2[i][j] = route;
                 l3[i][j] = route;
-                cells ++;
-                cells ++;
                 vias ++;
             }
         }
@@ -464,13 +447,11 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 l2[i-1][j] = route;
                 i--;
                 count--;
-                cells ++;
             }
             else if ((i+1 < x) && (l2[i+1][j] == (count - 1)) && (l2[i+1][j] >= 0)){
                 l2[i+1][j] = route;
                 i++;
                 count--;
-                cells ++;
             }
             else if(l3[i][j] == (count-via) && (l3[i][j] >= 0)){
                 z = 3;
@@ -479,8 +460,6 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
 //                l2[i][j] = v23;
                 l3[i][j] = route;
                 l2[i][j] = route;
-                cells ++;
-                cells ++;
                 vias ++;
             }
             else if(l1[i][j] == (count-via) && (l1[i][j] >= 0)){
@@ -490,8 +469,6 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 l2[i][j] = route;
                 z = 1;
                 count-=via;
-                cells ++;
-                cells ++;
                 vias ++;
             }
         }
@@ -501,7 +478,6 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
 //        case(1): {
 //            l1[source.x][source.y] = v12;
 //            l2[source.x][source.y] = v12;
-//            cells ++;
 //        }
 //            break;
 //        case(2): {
@@ -509,13 +485,11 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
 //                case(1):{
 //                    l1[source.x][source.y] = v12;
 //                    l2[source.x][source.y] = v12;
-//                    cells ++;
 //                }
 //                    break;
 //                case(3):{
 //                    l3[source.x][source.y] = v23;
 //                    l2[source.x][source.y] = v23;
-//                    cells ++;
 //                }
 //                    break;
 //            }
@@ -524,7 +498,6 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
 //        case(3): {
 //            l3[source.x][source.y] = v23;
 //            l2[source.x][source.y] = v23;
-//            cells ++;
 //        }
 //            break;
 //    }
@@ -540,6 +513,12 @@ void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
                 l2[i][j] = 0;
             if(l3[i][j] > 0)
                 l3[i][j] = 0;
+            if (l1[i][j] == route)
+                cells++;
+            if (l2[i][j] == route)
+                cells++;
+            if (l3[i][j] == route)
+                cells++;
         }
     }
 }
