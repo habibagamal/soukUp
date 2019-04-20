@@ -26,7 +26,7 @@ bool input(coord &source, coord &target, int x, int y);
 void printMatrix (vector<vector<int>> m, int x, int y);
 coord traverse(vector <vector<int>> &l,  int x, int y, coord s, coord t);
 void noFlooding (vector <vector<int>> l1, vector <vector<int>> l2, vector <vector<int>> l3, int x, int y, coord newSource, coord target);
-bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0);
+bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0, bool isSource);
 bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1);
 void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y);
 void undoTraversal(vector<vector<int>> &l, int x, int y, coord s, coord t);
@@ -236,17 +236,35 @@ void noFlooding (vector<vector<int>> l1, vector<vector<int>> l2, vector<vector<i
     }
 }
 
-bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0){
+bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0, bool isSource){
     int count = count0;
     switch(newSource.z){
-        case (1):
-            l1[newSource.x][newSource.y] = count;
+        case (1):{
+            if (isSource)
+                l1[newSource.x][newSource.y] = count;
+            else if (l1[newSource.x][newSource.y] == 0)
+                l1[newSource.x][newSource.y] = count;
+            else
+                return false;
+        }
             break;
-        case (2):
-            l2[newSource.x][newSource.y] = count;
+        case (2):{
+            if (isSource)
+                l2[newSource.x][newSource.y] = count;
+            else if (l2[newSource.x][newSource.y] == 0)
+                l2[newSource.x][newSource.y] = count;
+            else
+                return false;
+        }
             break;
-        case (3):
-            l3[newSource.x][newSource.y] = count;
+        case (3):{
+            if (isSource)
+                l3[newSource.x][newSource.y] = count;
+            else if (l3[newSource.x][newSource.y] == 0)
+                l3[newSource.x][newSource.y] = count;
+            else
+                return false;
+        }
             break;
     }
     int imin, imax, jmin, jmax;
@@ -528,6 +546,7 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
     coord newSource;
     cells = 0;
     vias = 0;
+    bool isSource = true;
     
     switch (source.z){
         case(1): {
@@ -577,25 +596,29 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
             newSource.z = ((newSource.z) % 3 )+ 1;
             vias++;
             count0 = 1 + via;
+            isSource = false;
         }
         else if (newSource.z > target.z){
             newSource.z = ((newSource.z - 1) % 3 );
             vias++;
             count0 = 1 + via;
+            isSource = false;
         }
         else if ((newSource.z == target.z) && ((target.z == 1) || (target.z == 3)) && (newSource.x != target.x)){
             newSource.z = 2;
             vias++;
             count0 = 1 + via;
+            isSource = false;
         }
         else if ((newSource.z == target.z) && (target.z == 2) && (newSource.y != target.y)){
             newSource.z = ((newSource.z) % 3 )+ 1;
             count0 = 1 + via;
             vias++;
+            isSource = false;
         }
 
 //        cout << "New source is " << newSource.x << " " << newSource.y << " " << newSource.z << endl;
-        flood(l1, l2, l3, x, y, newSource, target, via, count0);
+        flood(l1, l2, l3, x, y, newSource, target, via, count0, isSource);
         cout << "FLODDING" << endl;
         printMatrix(l1, x, y);
         cout << endl << endl;
@@ -626,7 +649,21 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
                 case (3): undoTraversal(l3, x, y, source, newSource);
                     break;
             }
-            route--;
+            switch (target.z){
+                case(1): {
+                    l1[target.x][target.y] = t_value;
+                }
+                    break;
+                case(2): {
+                    l2[target.x][target.y] = t_value;
+                }
+                    break;
+                case(3): {
+                    l3[target.x][target.y] = t_value;
+                }
+                    break;
+            }
+            route++;
             printMatrix(l1, x, y);
             cout << endl << endl;
             printMatrix(l2, x, y);
@@ -685,5 +722,5 @@ void undoTraversal(vector<vector<int>> &l,  int x, int y, coord s, coord t){
         }
     }
     l[s.x][s.y] = s_value;
-    l[t.x][t.y] = t_value;
+//    l[t.x][t.y] = t_value;
 }
