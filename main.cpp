@@ -419,7 +419,7 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
     while(i!=source.x | j!=source.y | z!=source.z){
         //horizontal
         if(z==1){
-            if((j-1 > 0) && (l1[i][j-1] == (count - 1)) && (l1[i][j-1] >= 0)){
+            if((j-1 >= 0) && (l1[i][j-1] == (count - 1)) && (l1[i][j-1] >= 0)){
                 l1[i][j-1] = route;
                 j--;
                 count--;
@@ -440,7 +440,7 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
             }
         }
         else if (z == 3){
-            if((j-1 > 0) && (l3[i][j-1] == (count - 1)) && (l3[i][j-1] >= 0)){
+            if((j-1 >= 0) && (l3[i][j-1] == (count - 1)) && (l3[i][j-1] >= 0)){
                 l3[i][j-1] = route;
                 j--;
                 count--;
@@ -462,7 +462,7 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
         }
         //vertical
         else {
-            if((i-1 > 0) && (l2[i-1][j] == (count - 1)) && (l2[i-1][j] >= 0)){
+            if((i-1 >= 0) && (l2[i-1][j] == (count - 1)) && (l2[i-1][j] >= 0)){
                 l2[i-1][j] = route;
                 i--;
                 count--;
@@ -578,9 +578,16 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
         }
         else {
             cells = 0;
-            isSource = false;
+            if ((source.x != newSource.x) && (source.y != newSource.y) && (source.z != newSource.z))
+                isSource = false;
         }
         flood(l1, l2, l3, x, y, newSource, target, via, count0, isSource);
+        printMatrix(l1, x, y);
+        cout << endl << endl;
+        printMatrix(l2, x, y);
+        cout << endl << endl;
+        printMatrix(l3, x, y);
+        cout << endl << endl;
         if (backTracking(l1, l2, l3, x, y, newSource, target, via, source)){
             backToLife(l1, l2, l3, x, y);
             cout << "BACKTRACKING" << endl;
@@ -680,7 +687,7 @@ coord floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
     newSourceBuffer = newSource;
     while (count < 3){
         bool isSource = (newSource2.x == newSource.x) && (newSource2.y == newSource.y) && (newSource2.z == newSource.z);
-        switch(newSource.z){
+        switch(newSource2.z){
             case 1: newSource1 = traverse(l1, x, y, newSource2, target, isSource);
                 break;
             case 2:newSource1 = traverse(l2, x, y, newSource2, target, isSource);
@@ -692,6 +699,8 @@ coord floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
                 break;
         }
         if ((newSource1.x == newSource2.x) && (newSource1.y == newSource2.y) && (newSource1.z == newSource2.z)){
+            if ((newSource1.x == target.x) && (newSource1.y == target.y) && (newSource1.z == target.z))
+                return target;
             if(newSourceBuffer.z != newSource1.z)
                 vias--;
             return newSourceBuffer;
