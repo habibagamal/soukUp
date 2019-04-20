@@ -51,3 +51,6 @@ Assumptions:
 
 2) There are only 3 available metal layers (M1: horizontal, M2: vertical, M3: horizontal)
 
+3) The x-coordinate range from 0 to x-1 & the y-coordinate range from 0 to y-1
+
+4) The z-coordinate is either 1, 2 or 3
