@@ -285,7 +285,7 @@ bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
     imin = imax = newSource.x;
     jmin = jmax = newSource.y;
    
-    while(count < 100 * via){
+    while(count < x * y * via){
 //                for (int i= imin; i<= imax; i++){
 //                    for (int j = jmin; j <= jmax; j++){
     
