@@ -4,6 +4,8 @@ Mini-project 2
 
 Made by: Habiba Bassem Gamal (900151007)
 
+
+
 After building the cpp file, the command line prompts on what you need to input. 
 These are the prompts in order of their output. 
 
@@ -41,6 +43,7 @@ Then the grids are outputted, followed by the route cost (if there is a route) a
 The first outputted grid is M1, followed by M2 then M3. 
 
 In the outputted grids, the cells of a particular route are labelled with the same number. 
+
 Any negative coordinate in x, y, or z of either the source or the target coordinates results in the program terminating. 
 
 Assumptions: the grids are initially empty
