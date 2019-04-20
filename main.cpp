@@ -30,8 +30,7 @@ bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
 bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1);
 void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y);
 void undoTraversal(vector<vector<int>> &l, int x, int y, coord s, coord t);
-void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via);
-void classicalImplementationWithSwap(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via);
+void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, bool swapCoord);
 void floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via);
 
 //main
@@ -74,12 +73,7 @@ int main(){
         if (!input(source, target, x, y))
             return 0;
         if (source.x >= 0 && source.y >= 0 && source.z >= 0 && target.x >= 0 && target.y >= 0 && target.z >= 0){
-            if (swapCoord){
-                classicalImplementationWithSwap(l1, l2, l3, x, y, source, target, via);
-            }
-            else {
-                classicalImplementation(l1, l2, l3, x, y, source, target, via);
-            }
+            classicalImplementation(l1, l2, l3, x, y, source, target, via, swapCoord);
         }
         route--;
 
@@ -525,180 +519,16 @@ void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
     }
 }
 
-void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via){
+void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, bool swapCoord){
     coord newSource;
     cells = 0;
     vias = 0;
     bool isSource = true;
-    
-    switch (source.z){
-        case(1): {
-            s_value = l1[source.x][source.y];
-            newSource = traverse(l1, x, y, source, target);
-        }
-            break;
-        case (2): {
-            s_value = l2[source.x][source.y];
-            newSource = traverse(l2, x, y, source, target);
-        }
-            break;
-        case (3): {
-            s_value = l3[source.x][source.y];
-            newSource = traverse(l3, x, y, source, target);
-        }
-            break;
-    }
-
-    switch (target.z){
-        case(1): {
-            t_value = l1[target.x][target.y];
-        }
-            break;
-        case (2): {
-            t_value = l2[target.x][target.y];
-        }
-            break;
-        case (3): {
-            t_value = l3[target.x][target.y];
-        }
-            break;
-    }
-    
-    
-    int count0 = 1;
-    if ((newSource.x == target.x) && (newSource.y == target.y) && (newSource.z == target.z)){
-        printMatrix(l1, x, y);
-        cout << endl << endl;
-        printMatrix(l2, x, y);
-        cout << endl << endl;
-        printMatrix(l3, x, y);
-        cout << endl << endl;
-    }
-    else {
-        if(newSource.z < target.z){
-            newSource.z = ((newSource.z) % 3 )+ 1;
-            vias++;
-            count0 = 1 + via;
-            isSource = false;
-        }
-        else if (newSource.z > target.z){
-            newSource.z = ((newSource.z - 1) % 3 );
-            vias++;
-            count0 = 1 + via;
-            isSource = false;
-        }
-        else if ((newSource.z == target.z) && ((target.z == 1) || (target.z == 3)) && (newSource.x != target.x)){
-            newSource.z = 2;
-            vias++;
-            count0 = 1 + via;
-            isSource = false;
-        }
-        else if ((newSource.z == target.z) && (target.z == 2) && (newSource.y != target.y)){
-            newSource.z = ((newSource.z) % 3 )+ 1;
-            count0 = 1 + via;
-            vias++;
-            isSource = false;
-        }
-
-        flood(l1, l2, l3, x, y, newSource, target, via, count0, isSource);
-        cout << "FLODDING" << endl;
-        printMatrix(l1, x, y);
-        cout << endl << endl;
-        printMatrix(l2, x, y);
-        cout << endl << endl;
-        printMatrix(l3, x, y);
-        cout << endl << endl;
-        if (backTracking(l1, l2, l3, x, y, newSource, target, via, source)){
-            backToLife(l1, l2, l3, x, y);
-        
-            cout << "BACKTRACKING" << endl;
-            printMatrix(l1, x, y);
-            cout << endl << endl;
-            printMatrix(l2, x, y);
-            cout << endl << endl;
-            printMatrix(l3, x, y);
-            cout << endl << endl;
-            cout << "Cost = " << (cells + vias * via) << endl;
-        } else {
-            cout << "No Path available" << endl;
-            backToLife(l1, l2, l3, x, y);
-            cells = 0;
-            switch (source.z){
-                case(1): undoTraversal(l1, x, y, source, newSource);
-                    break;
-                case (2): undoTraversal(l2, x, y, source, newSource);
-                    break;
-                case (3): undoTraversal(l3, x, y, source, newSource);
-                    break;
-            }
-            switch (target.z){
-                case(1): {
-                    l1[target.x][target.y] = t_value;
-                }
-                    break;
-                case(2): {
-                    l2[target.x][target.y] = t_value;
-                }
-                    break;
-                case(3): {
-                    l3[target.x][target.y] = t_value;
-                }
-                    break;
-            }
-            route++;
-            printMatrix(l1, x, y);
-            cout << endl << endl;
-            printMatrix(l2, x, y);
-            cout << endl << endl;
-            printMatrix(l3, x, y);
-            cout << endl << endl;
-        }
-    }
-}
-
-void undoTraversal(vector<vector<int>> &l,  int x, int y, coord s, coord t){
-    if (s.z  == 2){
-        if (t.x > s.x){
-            for (int i = s.x + 1; i<=t.x; i++){
-                if (l[i][s.y] == route){
-                    l[i][s.y] = 0;
-                }
-            }
-        }
-        else {
-            for (int i = s.x + 1; i>=t.x; i--){
-                if (l[i][s.y] == route){
-                    l[i][s.y] = 0;
-                }
-            }
-        }
-    }
-    //horizontal
-    else{
-        if (t.y > s.y){
-            for (int j = s.y + 1; j <= t.y; j++){
-                if (l[s.x][j] == route){
-                    l[s.x][j] = 0;
-                }
-            }
-        }
-        else {
-            for (int j = s.y + 1; j >= t.y; j--){
-                if (l[s.x][j] == route){
-                    l[s.x][j] = 0;
-                }
-            }
-        }
-    }
-    l[s.x][s.y] = s_value;
-}
-
-void classicalImplementationWithSwap(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via){
-    coord newSource;
-    cells = 0;
-    vias = 0;
-    bool isSource = true;
-    int swap = 2;
+    int swap;
+    if (swapCoord)
+        swap = 2;
+    else
+        swap = 1;
     
     while (swap > 0){
         switch (source.z){
@@ -779,7 +609,6 @@ void classicalImplementationWithSwap(vector<vector<int>> &l1, vector<vector<int>
             cout << endl << endl;
             if (backTracking(l1, l2, l3, x, y, newSource, target, via, source)){
                 backToLife(l1, l2, l3, x, y);
-                
                 cout << "BACKTRACKING" << endl;
                 printMatrix(l1, x, y);
                 cout << endl << endl;
@@ -831,6 +660,43 @@ void classicalImplementationWithSwap(vector<vector<int>> &l1, vector<vector<int>
             }
         }
     }
+}
+
+void undoTraversal(vector<vector<int>> &l,  int x, int y, coord s, coord t){
+    if (s.z  == 2){
+        if (t.x > s.x){
+            for (int i = s.x + 1; i<=t.x; i++){
+                if (l[i][s.y] == route){
+                    l[i][s.y] = 0;
+                }
+            }
+        }
+        else {
+            for (int i = s.x + 1; i>=t.x; i--){
+                if (l[i][s.y] == route){
+                    l[i][s.y] = 0;
+                }
+            }
+        }
+    }
+    //horizontal
+    else{
+        if (t.y > s.y){
+            for (int j = s.y + 1; j <= t.y; j++){
+                if (l[s.x][j] == route){
+                    l[s.x][j] = 0;
+                }
+            }
+        }
+        else {
+            for (int j = s.y + 1; j >= t.y; j--){
+                if (l[s.x][j] == route){
+                    l[s.x][j] = 0;
+                }
+            }
+        }
+    }
+    l[s.x][s.y] = s_value;
 }
 
 void floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via){
