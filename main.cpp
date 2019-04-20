@@ -10,6 +10,7 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
+#include <time.h>
 using namespace std;
 
 //structs
@@ -73,11 +74,15 @@ int main(){
     source.x = source.y =  target.x = target.y = 0;
     source.z = target.z = 1;
     
+    clock_t time;
     while (source.x >= 0 && source.y >= 0 && source.z > 0 && target.x >= 0 && target.y >= 0 && target.z > 0){
         if (!input(source, target, x, y))
             return 0;
         if (source.x >= 0 && source.y >= 0 && source.z > 0 && target.x >= 0 && target.y >= 0 && target.z > 0){
+            time = clock();
             classicalImplementation(l1, l2, l3, x, y, source, target, via, swapCoord, floodLessB);
+            time = clock() - time;
+            cout << "Execution time = " << (double)((double)time/CLOCKS_PER_SEC) << endl;
         }
         route--;
 
@@ -560,12 +565,6 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
         
         if (floodLessB)
             newSource = floodLess(l1, l2, l3, x, y, source, target);
-        printMatrix(l1, x, y);
-        cout << endl << endl;
-        printMatrix(l2, x, y);
-        cout << endl << endl;
-        printMatrix(l3, x, y);
-        cout << endl << endl;
         int count0 = 1;
         if ((newSource.x == target.x) && (newSource.y == target.y) && (newSource.z == target.z)){
             printMatrix(l1, x, y);
@@ -582,13 +581,6 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
             isSource = false;
         }
         flood(l1, l2, l3, x, y, newSource, target, via, count0, isSource);
-        cout << "FLODDING" << endl;
-        printMatrix(l1, x, y);
-        cout << endl << endl;
-        printMatrix(l2, x, y);
-        cout << endl << endl;
-        printMatrix(l3, x, y);
-        cout << endl << endl;
         if (backTracking(l1, l2, l3, x, y, newSource, target, via, source)){
             backToLife(l1, l2, l3, x, y);
             cout << "BACKTRACKING" << endl;
