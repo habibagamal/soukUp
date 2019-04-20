@@ -157,6 +157,11 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t, bool isS
     if (s.z  == 2){ //vertical
         if (isSource) //is s == initial source
             l[s.x][s.y] = route;
+        else if ((s.x == t.x) && (s.y == t.y) && (s.z == t.z)){ //s is target
+            l[s.x][s.y] = route;
+            cells++;
+            return t;
+        }
         else if (l[s.x][s.y] == 0)
              l[s.x][s.y] = route;
         else //is s is not initial source and it is visited
@@ -198,6 +203,11 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t, bool isS
     else{
         if (isSource) //is s == initial source
             l[s.x][s.y] = route;
+        else if ((s.x == t.x) && (s.y == t.y) && (s.z == t.z)){ //s is target
+            l[s.x][s.y] = route;
+            cells++;
+            return t;
+        }
         else if (l[s.x][s.y] == 0)
             l[s.x][s.y] = route;
         else
@@ -591,6 +601,21 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
                 isSource = false;
         }
         flood(l1, l2, l3, x, y, newSource, target, via, count0, isSource);
+        
+        
+//        ///////////////////
+//        //remove before submission
+//        cout << "Flooding" << endl;
+//        printMatrix(l1, x, y);
+//        cout << endl << endl;
+//        printMatrix(l2, x, y);
+//        cout << endl << endl;
+//        printMatrix(l3, x, y);
+//        cout << endl << endl;
+//        ///////////////////
+//        //remove before submission
+        
+        
         if (backTracking(l1, l2, l3, x, y, newSource, target, via, source)){ //get route
             backToLife(l1, l2, l3, x, y); //empty flooded, non-routed cells
             cout << "BACKTRACKING" << endl;

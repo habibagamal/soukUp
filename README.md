@@ -46,4 +46,8 @@ In the outputted grids, the cells of a particular route are labelled with the sa
 
 Any negative coordinate in x, y, or z of either the source or the target coordinates results in the program terminating. 
 
-Assumptions: the grids are initially empty
+Assumptions: 
+1) The grids are initially empty
+
+2) There are only 3 available metal layers (M1: horizontal, M2: vertical, M3: horizontal)
+
