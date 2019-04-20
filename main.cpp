@@ -23,24 +23,24 @@ int route = -10;
 int s_value, t_value;
 
 //function declarations
-bool input(coord &source, coord &target, int x, int y);
-void printMatrix (vector<vector<int>> m, int x, int y);
-coord traverse(vector <vector<int>> &l,  int x, int y, coord s, coord t, bool isSource);
-bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0, bool isSource);
-bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1);
-void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y);
-void undoTraversal(vector<vector<int>> &l, int x, int y, coord s, coord t);
-void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, bool swapCoord, bool floodLessB);
-coord floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target);
+bool input(coord &source, coord &target, int x, int y); //takes in the input coordinates and validates input
+void printMatrix (vector<vector<int>> m, int x, int y); //print a matrix
+coord traverse(vector <vector<int>> &l,  int x, int y, coord s, coord t, bool isSource); //DFS part
+bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0, bool isSource); //BFS part
+bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1); //To generate route
+void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y); //Erase flooding after route is complete
+void undoTraversal(vector<vector<int>> &l, int x, int y, coord s, coord t); //remove route of traversal if no path is found
+void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, bool swapCoord, bool floodLessB); //full implementation
+coord floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target); //DFS until flooding is needed
 
 //main
 int main(){
-    int x, y;
+    int x, y; //coordinates of grid
     
     //getting the input dimensions
-    int via;
-    bool swapCoord;
-    bool floodLessB;
+    int via; //via cost
+    bool swapCoord; //swap source and target when no path is found
+    bool floodLessB; //DFS until flooding is needed
     
     cout << "Please enter cost of via\n";
     cin >> via;
@@ -79,10 +79,10 @@ int main(){
         if (!input(source, target, x, y))
             return 0;
         if (source.x >= 0 && source.y >= 0 && source.z > 0 && target.x >= 0 && target.y >= 0 && target.z > 0){
-            time = clock();
+            time = clock(); //to measure CPU time
             classicalImplementation(l1, l2, l3, x, y, source, target, via, swapCoord, floodLessB);
-            time = clock() - time;
-            cout << "Execution time = " << (double)((double)time/CLOCKS_PER_SEC) << endl;
+            time = clock() - time; //to measure CPU time
+            cout << "Execution time = " << (double)((double)time/CLOCKS_PER_SEC) << endl; //to measure CPU time
         }
         route--;
 
@@ -154,21 +154,21 @@ void printMatrix (vector<vector<int>> m, int x, int y){
 coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t, bool isSource){
     //vertical
     coord newSource;
-    if (s.z  == 2){
-        if (isSource)
+    if (s.z  == 2){ //vertical
+        if (isSource) //is s == initial source
             l[s.x][s.y] = route;
         else if (l[s.x][s.y] == 0)
              l[s.x][s.y] = route;
-        else
+        else //is s is not initial source and it is visited
             return s;
-        cells ++;
+        cells ++; //increment cells (to account for s)
         if (t.x > s.x){
-            for (int i = s.x + 1; i<=t.x; i++){
-                if (l[i][s.y] == 0){
-                    l[i][s.y] = route;
+            for (int i = s.x + 1; i<=t.x; i++){ //iterate vertically from source to target
+                if (l[i][s.y] == 0){ //if cell is empty
+                    l[i][s.y] = route; //visit cell
                     cells ++;
                 }
-                else{
+                else{ //else return
                     newSource.x = i-1;
                     newSource.y = s.y;
                     newSource.z = s.z;
@@ -177,12 +177,12 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t, bool isS
             }
         }
         else {
-            for (int i = s.x - 1; i >= t.x; i--){
-                if (l[i][s.y] == 0){
-                    l[i][s.y] = route;
+            for (int i = s.x - 1; i >= t.x; i--){ //iterate vertically from source to target
+                if (l[i][s.y] == 0){ //if cell is empty
+                    l[i][s.y] = route; //visit cell
                     cells ++;
                 }
-                else{
+                else{ //else return
                     newSource.x = i+1;
                     newSource.y = s.y;
                     newSource.z = s.z;
@@ -190,26 +190,26 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t, bool isS
                 }
             }
         }
-        newSource.x = t.x;
-        newSource.y = s.y;
-        newSource.z = s.z;
+        newSource.x = t.x; //t.x is reached
+        newSource.y = s.y; //same y as s
+        newSource.z = s.z; //same z as s
     }
     //horizontal
     else{
-        if (isSource)
+        if (isSource) //is s == initial source
             l[s.x][s.y] = route;
         else if (l[s.x][s.y] == 0)
             l[s.x][s.y] = route;
         else
-            return s;
-        cells++;
+            return s; //is s is not initial source and it is visited
+        cells++; //increment cells (to account for s)
         if (t.y > s.y){
-            for (int j = s.y + 1; j <= t.y; j++){
-                if (l[s.x][j] == 0){
-                    l[s.x][j] = route;
+            for (int j = s.y + 1; j <= t.y; j++){ //iterate horizontally from source to target
+                if (l[s.x][j] == 0){ //if cell is empty
+                    l[s.x][j] = route; //visit cell
                     cells++;
                 }
-                else{
+                else{ //else return
                     newSource.x = s.x;
                     newSource.y = j-1;
                     newSource.z = s.z;
@@ -218,12 +218,13 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t, bool isS
             }
         }
         else {
-            for (int j = s.y - 1; j >= t.y; j--){
-                if (l[s.x][j] == 0){
-                    l[s.x][j] = route;
+            for (int j = s.y - 1; j >= t.y; j--){ //iterate horizontally from source to target
+                if (l[s.x][j] == 0){ //if cell is empty
+                    l[s.x][j] = route; //visit cell
                     cells++;
                 }
-                else{
+                else{ //else return
+                    newSource.x = s.x;
                     newSource.x = s.x;
                     newSource.y = j+1;
                     newSource.z = s.z;
@@ -231,78 +232,81 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t, bool isS
                 }
             }
         }
-        newSource.x = s.x;
-        newSource.y = t.y;
-        newSource.z = s.z;
+        newSource.x = s.x; //iteration was only horizontal so same x as s
+        newSource.y = t.y; // y of target is reached
+        newSource.z = s.z; //iteration was only horizontal so same z as s
     }
     return newSource;
 }
 
 bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target, int via, int count0, bool isSource){
-    int count = count0;
+    int count = count0; //initial count
     switch(newSource.z){
         case (1):{
-            if (isSource)
-                l1[newSource.x][newSource.y] = count;
-            else if (l1[newSource.x][newSource.y] == 0 || l1[newSource.x][newSource.y] == route)
+            if (isSource) //if newSource is the initial source
+                l1[newSource.x][newSource.y] = count; //set cell to initial count (even if it is not empty)
+            else if (l1[newSource.x][newSource.y] == 0 || l1[newSource.x][newSource.y] == route) //else then cell must be empty
                 l1[newSource.x][newSource.y] = count;
             else
-                return false;
+                return false; //else there is no path
         }
             break;
         case (2):{
-            if (isSource)
-                l2[newSource.x][newSource.y] = count;
-            else if (l2[newSource.x][newSource.y] == 0 || l2[newSource.x][newSource.y] == route)
+            if (isSource) //if newSource is the initial source
+                l2[newSource.x][newSource.y] = count; //set cell to initial count (even if it is not empty)
+            else if (l2[newSource.x][newSource.y] == 0 || l2[newSource.x][newSource.y] == route) //else then cell must be empty
                 l2[newSource.x][newSource.y] = count;
             else
-                return false;
+                return false; //else there is no path
         }
             break;
         case (3):{
-            if (isSource)
-                l3[newSource.x][newSource.y] = count;
-            else if (l3[newSource.x][newSource.y] == 0 || l3[newSource.x][newSource.y] == route)
+            if (isSource) //if newSource is the initial source
+                l3[newSource.x][newSource.y] = count; //set cell to initial count (even if it is not empty)
+            else if (l3[newSource.x][newSource.y] == 0 || l3[newSource.x][newSource.y] == route) //else then cell must be empty
                 l3[newSource.x][newSource.y] = count;
             else
-                return false;
+                return false; //else there is no path
         }
             break;
     }
+    //for optimization (not implemented)
     int imin, imax, jmin, jmax;
     imin = imax = newSource.x;
     jmin = jmax = newSource.y;
-    while (count < (x+y+2*via)){
+   
 //    while(count < 100){
 //                for (int i= imin; i<= imax; i++){
 //                    for (int j = jmin; j <= jmax; j++){
+    
+     while (count < (x+y+2*via)){ //maximum count
         for (int i = 0; i<x; i++){
             for (int j = 0; j<y; j++){
-                        if (l1[i][j] == count){
+                        if (l1[i][j] == count){ //check if cell in l1 == count
                             
-                            if((i == target.x) && (j == target.y) && (target.z == 2)){
+                            if((i == target.x) && (j == target.y) && (target.z == 2)){ //check is cell above is target
                                 l2[i][j] = count + via;
-                                return true;
+                                return true; //path found
                             }
-                            if(l2[i][j] == 0){
+                            if(l2[i][j] == 0){ //check if cell above is empty
                                 l2[i][j] = count + via;
                             }
                             
-                            if((i == target.x) && ((j+1) == target.y) && (target.z == 1)){
+                            if((i == target.x) && ((j+1) == target.y) && (target.z == 1)){ //check if cell to the right is target
                                 l1[i][j+1] = count+1;
-                                return true;
+                                return true; //path found
                             }
-                            if((j+1<y) && (l1[i][j+1] == 0)){
+                            if((j+1<y) && (l1[i][j+1] == 0)){ //check if cell to the right is empty
                                 jmax = j+1;
 //                                i= imin;
                                 l1[i][j+1] = count+1;
                             }
                             
-                            if((i == target.x) && ((j-1) == target.y) && (target.z == 1)){
+                            if((i == target.x) && ((j-1) == target.y) && (target.z == 1)){ //check if cell to the left is target
                                 l1[i][j-1] = count+1;
-                                return true;
+                                return true; //path found
                             }
-                            if((j-1>=0) && (l1[i][j-1] == 0)){
+                            if((j-1>=0) && (l1[i][j-1] == 0)){  //check if cell to the left is empty
                                 jmin = j-1;
 //                                i = imin;
 //                                j = jmin;
@@ -311,40 +315,40 @@ bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
                         }
                         
                         
-                        if (l2[i][j] == count){
+                        if (l2[i][j] == count){  //check if cell in l2 == count
                             
-                            if((j == target.y) && (i == target.x) && (target.z == 1)){
+                            if((j == target.y) && (i == target.x) && (target.z == 1)){ //check if cell below is target
                                 l1[i][j] = count + via;
-                                return true;
+                                return true; //path found
                             }
-                            if(l1[i][j] == 0){
+                            if(l1[i][j] == 0){ //check if cell below is empty
                                 l1[i][j] = count + via;
                                 
                             }
                             
-                            if((j == target.y) && (i == target.x) && (target.z == 3)){
+                            if((j == target.y) && (i == target.x) && (target.z == 3)){ //check if cell above is target
                                 l3[i][j] = count + via;
-                                return true;
+                                return true; //path found
                             }
-                            if(l3[i][j] == 0){
+                            if(l3[i][j] == 0){ //check if cell above is empty
                                 l3[i][j] = count + via;
                             }
                             
-                            if((j == target.y) && ((i+1) == target.x) && (target.z == 2)){
+                            if((j == target.y) && ((i+1) == target.x) && (target.z == 2)){ //check if cell upwards (in same metal layer) is target
                                 l2[i+1][j] = count+1;
-                                return true;
+                                return true; //path found
                             }
-                            if((i+1<x) && (l2[i+1][j] == 0)){
+                            if((i+1<x) && (l2[i+1][j] == 0)){ //check if cell upwards (in same metal layer) is empty
                                 imax = i + 1;
 //                                j = jmin;
                                 l2[i+1][j] = count+1;
                             }
                             
-                            if((j == target.y) && ((i-1) == target.x) && (target.z == 2)){
+                            if((j == target.y) && ((i-1) == target.x) && (target.z == 2)){ //check if cell downwards (in same metal layer) is target
                                 l2[i-1][j] = count+1;
-                                return true;
+                                return true; //path found
                             }
-                            if((i-1>=0) && (l2[i-1][j] == 0)){
+                            if((i-1>=0) && (l2[i-1][j] == 0)){ //check is cell downwards (in same metal layer) is empty
                                     imin = i-1;
                                     //                                j = jmin;
                                     //                                i = imin;
@@ -352,31 +356,31 @@ bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
                             }
                         }
                         
-                        if (l3[i][j] == count){
+                        if (l3[i][j] == count){ //check if cell in l3 == count
                     
-                            if((i == target.x) && (j == target.y) && (target.z == 2)){
+                            if((i == target.x) && (j == target.y) && (target.z == 2)){ //check if cell below is target
                                 l2[i][j] = count + via;
-                                return true;
+                                return true; //path found
                             }
-                            if(l2[i][j] == 0){
+                            if(l2[i][j] == 0){ //check if cell below is empty
                                 l2[i][j] = count + via;
                             }
                             
-                            if((i == target.x) && ((j+1) == target.y) && (target.z == 3)){
+                            if((i == target.x) && ((j+1) == target.y) && (target.z == 3)){ //check if cell to the right is target
                                 l3[i][j+1] = count+1;
-                                return true;
+                                return true; //path found
                             }
-                            if((j+1<y) && (l3[i][j+1] == 0)){
+                            if((j+1<y) && (l3[i][j+1] == 0)){ //check if cell to the right is empty
                                     jmax = j + 1;
                                     //                                i = imin;
                                     l3[i][j+1] = count+1;
                             }
                             
-                            if((i == target.x) && ((j-1) == target.y) && (target.z == 3)){
+                            if((i == target.x) && ((j-1) == target.y) && (target.z == 3)){ //check if cell to the left if target
                                 l3[i][j-1] = count+1;
-                                return true;
+                                return true; //path found
                             }
-                            if((j-1>=0) && (l3[i][j-1] == 0)){
+                            if((j-1>=0) && (l3[i][j-1] == 0)){ //check if cell to the left is empty
                                     jmin = j-1;
 //                                    i = imin;
 //                                    j = jmin;
@@ -388,30 +392,30 @@ bool flood(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>>
         count++;
 
     }
-    return false;
+    return false; //path not found
 }
 
 bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, coord source1){
-    int count = 0;
+    int count = 0; //count we're looking for
     switch (target.z){
         case(1): {
-            count = l1[target.x][target.y];
-            l1[target.x][target.y] = route;
+            count = l1[target.x][target.y]; //initialize count with cost of target cell
+            l1[target.x][target.y] = route; //set target cell to route
         }
             break;
         case(2): {
-            count = l2[target.x][target.y];
-            l2[target.x][target.y] = route;
+            count = l2[target.x][target.y]; //initialize count with cost of target cell
+            l2[target.x][target.y] = route;  //set target cell to route
         }
             break;
         case(3): {
-            count = l3[target.x][target.y];
-            l3[target.x][target.y] = route;
+            count = l3[target.x][target.y]; //initialize count with cost of target cell
+            l3[target.x][target.y] = route;  //set target cell to route
         }
             break;
     }
 
-    if (count <= 0)
+    if (count <= 0) //did not reach target and there is no route
         return false;
     int i = target.x;
     int j = target.y;
@@ -419,17 +423,17 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
     while(i!=source.x | j!=source.y | z!=source.z){
         //horizontal
         if(z==1){
-            if((j-1 >= 0) && (l1[i][j-1] == (count - 1)) && (l1[i][j-1] >= 0)){
+            if((j-1 >= 0) && (l1[i][j-1] == (count - 1)) && (l1[i][j-1] >= 0)){ //checking if next cell in route is left cell
                 l1[i][j-1] = route;
                 j--;
                 count--;
             }
-            else if ((j+1 < y) && (l1[i][j+1] == (count - 1)) && (l1[i][j+1] >= 0)){
+            else if ((j+1 < y) && (l1[i][j+1] == (count - 1)) && (l1[i][j+1] >= 0)){ //checking if next cell in route is right cell
                 l1[i][j+1] = route;
                 j++;
                 count--;
             }
-            else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){
+            else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){ //checking if next cell in route is cell above
                 z = 2;
                 count -= via;
                 l2[i][j] = route;
@@ -440,17 +444,17 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
             }
         }
         else if (z == 3){
-            if((j-1 >= 0) && (l3[i][j-1] == (count - 1)) && (l3[i][j-1] >= 0)){
+            if((j-1 >= 0) && (l3[i][j-1] == (count - 1)) && (l3[i][j-1] >= 0)){ //checking if next cell in route is left cell
                 l3[i][j-1] = route;
                 j--;
                 count--;
             }
-            else if ((j+1 < y) && (l3[i][j+1] == (count - 1)) && (l3[i][j+1] >= 0)){
+            else if ((j+1 < y) && (l3[i][j+1] == (count - 1)) && (l3[i][j+1] >= 0)){ //checking if next cell in route is right cell
                 l3[i][j+1] = route;
                 j++;
                 count--;
             }
-            else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){
+            else if(l2[i][j] == (count-via) && (l2[i][j] >= 0)){ //checking if next cell in route is cell below
                 z = 2;
                 count-=via;
 //                l2[i][j] = v23;
@@ -462,17 +466,17 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
         }
         //vertical
         else {
-            if((i-1 >= 0) && (l2[i-1][j] == (count - 1)) && (l2[i-1][j] >= 0)){
+            if((i-1 >= 0) && (l2[i-1][j] == (count - 1)) && (l2[i-1][j] >= 0)){ //checking if next cell in route is cell downwards (in same metal layer)
                 l2[i-1][j] = route;
                 i--;
                 count--;
             }
-            else if ((i+1 < x) && (l2[i+1][j] == (count - 1)) && (l2[i+1][j] >= 0)){
+            else if ((i+1 < x) && (l2[i+1][j] == (count - 1)) && (l2[i+1][j] >= 0)){ //checking if next cell in route is cell upwards (in same metal layer)
                 l2[i+1][j] = route;
                 i++;
                 count--;
             }
-            else if(l3[i][j] == (count-via) && (l3[i][j] >= 0)){
+            else if(l3[i][j] == (count-via) && (l3[i][j] >= 0)){ //checking if next cell in route is cell above
                 z = 3;
                 count-=via;
 //                l3[i][j] = v23;
@@ -481,7 +485,7 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
                 l2[i][j] = route;
                 vias ++;
             }
-            else if(l1[i][j] == (count-via) && (l1[i][j] >= 0)){
+            else if(l1[i][j] == (count-via) && (l1[i][j] >= 0)){ //checking if next cell in route is cell below
 //                l1[i][j] = v12;
 //                l2[i][j] = v12;
                 l1[i][j] = route;
@@ -499,12 +503,14 @@ bool backTracking(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vecto
 void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y){
     for (int i=0; i<x; i++){
         for(int j=0; j<y; j++){
+            // emptying flooded cells that are not part of route
             if(l1[i][j] > 0)
                 l1[i][j] = 0;
             if(l2[i][j] > 0)
                 l2[i][j] = 0;
             if(l3[i][j] > 0)
                 l3[i][j] = 0;
+            //getting # of cells
             if (l1[i][j] == route)
                 cells++;
             if (l2[i][j] == route)
@@ -517,32 +523,32 @@ void backToLife(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
 
 void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord source, coord target, int via, bool swapCoord, bool floodLessB){
     coord newSource;
-    cells = 0;
-    vias = 0;
-    bool isSource = true;
+    cells = 0; //# of cells
+    vias = 0; //# of vias
+    bool isSource = true; //source is same as newSource
     int swap;
-    if (swapCoord)
-        swap = 2;
+    if (swapCoord) //if target and source will be swapped if no source
+        swap = 2; //swap = 2 (to allow for 1 swap)
     else
-        swap = 1;
+        swap = 1; //swap = 1 (to allow for 0 swaps)
     
     while (swap > 0){
         switch (source.z){
             case(1): {
-                s_value = l1[source.x][source.y];
-                if (!floodLessB)
+                s_value = l1[source.x][source.y]; //s_value is values of source cell (used if no path is available to retrieve old matrix)
+                if (!floodLessB) //if implementation is not floodLess (more DFS)
                     newSource = traverse(l1, x, y, source, target, isSource);
             }
                 break;
             case (2): {
-                s_value = l2[source.x][source.y];
-                if (!floodLessB)
+                s_value = l2[source.x][source.y]; //s_value is values of source cell (used if no path is available to retrieve old matrix)
+                if (!floodLessB) //if implementation is not floodLess (more DFS)
                     newSource = traverse(l2, x, y, source, target, isSource);
             }
                 break;
             case (3): {
-                s_value = l3[source.x][source.y];
-                if (!floodLessB)
+                s_value = l3[source.x][source.y]; //s_value is values of source cell (used if no path is available to retrieve old matrix)
+                if (!floodLessB) //if implementation is not floodLess (more DFS)
                     newSource = traverse(l3, x, y, source, target, isSource);
             }
                 break;
@@ -550,22 +556,25 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
         
         switch (target.z){
             case(1): {
-                t_value = l1[target.x][target.y];
+                t_value = l1[target.x][target.y]; //t_value is values of target cell (used if no path is available to retrieve old matrix)
             }
                 break;
             case (2): {
-                t_value = l2[target.x][target.y];
+                t_value = l2[target.x][target.y]; //t_value is values of target cell (used if no path is available to retrieve old matrix)
             }
                 break;
             case (3): {
-                t_value = l3[target.x][target.y];
+                t_value = l3[target.x][target.y]; //t_value is values of target cell (used if no path is available to retrieve old matrix)
             }
                 break;
         }
         
-        if (floodLessB)
+        if (floodLessB) //if implementation is floodLess (more DFS)
             newSource = floodLess(l1, l2, l3, x, y, source, target);
-        int count0 = 1;
+        
+        int count0 = 1; //initial count for cell in flooding
+        
+        //if target is reached
         if ((newSource.x == target.x) && (newSource.y == target.y) && (newSource.z == target.z)){
             printMatrix(l1, x, y);
             cout << endl << endl;
@@ -577,19 +586,13 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
             return;
         }
         else {
-            cells = 0;
+            cells = 0; //reset cells count
             if ((source.x != newSource.x) && (source.y != newSource.y) && (source.z != newSource.z))
                 isSource = false;
         }
         flood(l1, l2, l3, x, y, newSource, target, via, count0, isSource);
-        printMatrix(l1, x, y);
-        cout << endl << endl;
-        printMatrix(l2, x, y);
-        cout << endl << endl;
-        printMatrix(l3, x, y);
-        cout << endl << endl;
-        if (backTracking(l1, l2, l3, x, y, newSource, target, via, source)){
-            backToLife(l1, l2, l3, x, y);
+        if (backTracking(l1, l2, l3, x, y, newSource, target, via, source)){ //get route
+            backToLife(l1, l2, l3, x, y); //empty flooded, non-routed cells
             cout << "BACKTRACKING" << endl;
             printMatrix(l1, x, y);
             cout << endl << endl;
@@ -598,37 +601,38 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
             printMatrix(l3, x, y);
             cout << endl << endl;
             cout << "Cost = " << (cells + vias * via) << endl;
-            swap = 0;
+            swap = 0; //set swap to 0 (aka do not swap) because path is found
         } else {
-            swap--;
-            backToLife(l1, l2, l3, x, y);
+            swap--; //decrement swap
+            backToLife(l1, l2, l3, x, y); //empty flooded cells
             cells = 0;
             switch (source.z){
-                case(1): undoTraversal(l1, x, y, source, newSource);
+                case(1): undoTraversal(l1, x, y, source, newSource); //remove traversed cells as no path is found
                     break;
-                case (2): undoTraversal(l2, x, y, source, newSource);
+                case (2): undoTraversal(l2, x, y, source, newSource); //remove traversed cells as no path is found
                     break;
-                case (3): undoTraversal(l3, x, y, source, newSource);
+                case (3): undoTraversal(l3, x, y, source, newSource); //remove traversed cells as no path is found
                     break;
             }
             switch (target.z){
                 case(1): {
-                    l1[target.x][target.y] = t_value;
+                    l1[target.x][target.y] = t_value; //set target cell to target value before flooding or traversal
                 }
                     break;
                 case(2): {
-                    l2[target.x][target.y] = t_value;
+                    l2[target.x][target.y] = t_value; //set target cell to target value before flooding or traversal
                 }
                     break;
                 case(3): {
-                    l3[target.x][target.y] = t_value;
+                    l3[target.x][target.y] = t_value; //set target cell to target value before flooding or traversal
                 }
                     break;
             }
+            //swap source and target
             coord temp = source;
             source = target;
             target = temp;
-            if (swap == 0){
+            if (swap == 0){ //if no more swaps, print grids anyway
                 cout << "No Path available" << endl;
                 route++;
                 printMatrix(l1, x, y);
@@ -638,23 +642,23 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
                 printMatrix(l3, x, y);
                 cout << endl << endl;
             }
-            }
+        }
     }
 }
 
 void undoTraversal(vector<vector<int>> &l,  int x, int y, coord s, coord t){
     if (s.z  == 2){
         if (t.x > s.x){
-            for (int i = s.x + 1; i<=t.x; i++){
-                if (l[i][s.y] == route){
-                    l[i][s.y] = 0;
+            for (int i = s.x + 1; i<=t.x; i++){ //vertical
+                if (l[i][s.y] == route){ //if cell was part of route
+                    l[i][s.y] = 0; //empty cell
                 }
             }
         }
-        else {
+        else { //vertical
             for (int i = s.x + 1; i>=t.x; i--){
-                if (l[i][s.y] == route){
-                    l[i][s.y] = 0;
+                if (l[i][s.y] == route){ //if cell was part of route
+                    l[i][s.y] = 0; //empty cell
                 }
             }
         }
@@ -663,29 +667,30 @@ void undoTraversal(vector<vector<int>> &l,  int x, int y, coord s, coord t){
     else{
         if (t.y > s.y){
             for (int j = s.y + 1; j <= t.y; j++){
-                if (l[s.x][j] == route){
-                    l[s.x][j] = 0;
+                if (l[s.x][j] == route){ //if cell was part of route
+                    l[s.x][j] = 0; //empty cell
                 }
             }
         }
         else {
             for (int j = s.y + 1; j >= t.y; j--){
-                if (l[s.x][j] == route){
-                    l[s.x][j] = 0;
+                if (l[s.x][j] == route){ //if cell was part of route
+                    l[s.x][j] = 0; //empty cell
                 }
             }
         }
     }
-    l[s.x][s.y] = s_value;
+    l[s.x][s.y] = s_value; //set source to value before filling (might not be zero)
 }
 
 coord floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<int>> &l3, int x, int y, coord newSource, coord target){
     int count = 0;
-    coord newSource1;
-    coord newSource2 = newSource;
-    coord newSourceBuffer;
-    newSourceBuffer = newSource;
+    coord newSource1; //return of traverse
+    coord newSource2 = newSource; //parameter of traverse
+    coord newSourceBuffer; //to save last value of newSource1
+    newSourceBuffer = newSource; //initially it is set to newSource
     while (count < 3){
+        //check is initial newSource is the same as newSource2
         bool isSource = (newSource2.x == newSource.x) && (newSource2.y == newSource.y) && (newSource2.z == newSource.z);
         switch(newSource2.z){
             case 1: newSource1 = traverse(l1, x, y, newSource2, target, isSource);
@@ -698,39 +703,39 @@ coord floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
             default:
                 break;
         }
-        if ((newSource1.x == newSource2.x) && (newSource1.y == newSource2.y) && (newSource1.z == newSource2.z)){
-            if ((newSource1.x == target.x) && (newSource1.y == target.y) && (newSource1.z == target.z))
+        if ((newSource1.x == newSource2.x) && (newSource1.y == newSource2.y) && (newSource1.z == newSource2.z)){ //no traverse
+            if ((newSource1.x == target.x) && (newSource1.y == target.y) && (newSource1.z == target.z)) //target reached
                 return target;
-            if(newSourceBuffer.z != newSource1.z)
+            if(newSourceBuffer.z != newSource1.z) //if no traverse, reduce vias
                 vias--;
-            return newSourceBuffer;
+            return newSourceBuffer; //return saved newSource1 value
         }
         else {
             newSource2 = newSource1;
         }
         
-        if ((newSource2.x == target.x) && (newSource2.y == target.y) && (newSource2.z == target.z)){
+        if ((newSource2.x == target.x) && (newSource2.y == target.y) && (newSource2.z == target.z)){ //target reached
             return target;
         }
         else {
-            if(newSource2.z < target.z){
-                newSource2.z = ((newSource2.z) % 3 )+ 1;
+            if(newSource2.z < target.z){ //z of target is greater
+                newSource2.z = ((newSource2.z) % 3 )+ 1; //increment z sent to traverse
                 vias++;
             }
-            else if (newSource2.z > target.z){
-                newSource2.z = ((newSource2.z - 1) % 3 );
+            else if (newSource2.z > target.z){ //z of target is less
+                newSource2.z = ((newSource2.z - 1) % 3 ); //decrement z sent to traverse
                 vias++;
             }
-            else if ((newSource2.z == target.z) && ((target.z == 1) || (target.z == 3)) && (newSource2.x != target.x)){
+            else if ((newSource2.z == target.z) && ((target.z == 1) || (target.z == 3)) && (newSource2.x != target.x)){ //horizontal layer and there is a difference vertically
                 newSource2.z = 2;
                 vias++;
             }
-            else if ((newSource2.z == target.z) && (target.z == 2) && (newSource2.y != target.y)){
+            else if ((newSource2.z == target.z) && (target.z == 2) && (newSource2.y != target.y)){ //vertical layer and their is a difference horizontally
                 newSource2.z = ((newSource2.z) % 3 )+ 1;
                 vias++;
             }
         }
-        newSourceBuffer = newSource1;
+        newSourceBuffer = newSource1; //update buffer
         count ++;
     }
     return newSource1;
