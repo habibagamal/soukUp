@@ -70,7 +70,8 @@ int main(){
     l3 = l1;
     
     coord source, target;
-    source.x = source.y = source.z = target.x = target.y = target.z = 0;
+    source.x = source.y =  target.x = target.y = 0;
+    source.z = target.z = 1;
     
     while (source.x >= 0 && source.y >= 0 && source.z > 0 && target.x >= 0 && target.y >= 0 && target.z > 0){
         if (!input(source, target, x, y))
@@ -559,6 +560,12 @@ void classicalImplementation(vector<vector<int>> &l1, vector<vector<int>> &l2, v
         
         if (floodLessB)
             newSource = floodLess(l1, l2, l3, x, y, source, target);
+        printMatrix(l1, x, y);
+        cout << endl << endl;
+        printMatrix(l2, x, y);
+        cout << endl << endl;
+        printMatrix(l3, x, y);
+        cout << endl << endl;
         int count0 = 1;
         if ((newSource.x == target.x) && (newSource.y == target.y) && (newSource.z == target.z)){
             printMatrix(l1, x, y);
@@ -677,6 +684,8 @@ coord floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
     int count = 0;
     coord newSource1;
     coord newSource2 = newSource;
+    coord newSourceBuffer;
+    newSourceBuffer = newSource;
     while (count < 3){
         bool isSource = (newSource2.x == newSource.x) && (newSource2.y == newSource.y) && (newSource2.z == newSource.z);
         switch(newSource.z){
@@ -690,8 +699,11 @@ coord floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
             default:
                 break;
         }
-        if ((newSource1.x == newSource2.x) && (newSource1.y == newSource2.y) && (newSource1.z == newSource2.z))
-            return newSource2;
+        if ((newSource1.x == newSource2.x) && (newSource1.y == newSource2.y) && (newSource1.z == newSource2.z)){
+            if(newSourceBuffer.z != newSource1.z)
+                vias--;
+            return newSourceBuffer;
+        }
         else {
             newSource2 = newSource1;
         }
@@ -717,8 +729,9 @@ coord floodLess(vector<vector<int>> &l1, vector<vector<int>> &l2, vector<vector<
                 vias++;
             }
         }
+        newSourceBuffer = newSource1;
         count ++;
     }
-    return newSource2;
+    return newSource1;
 }
 
