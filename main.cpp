@@ -160,7 +160,7 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
                     l[i][s.y] = route;
                 }
                 else{
-                    newSource.x = i-1;
+                    newSource.x = i+1;
                     newSource.y = s.y;
                     newSource.z = s.z;
                     return newSource;
@@ -194,7 +194,7 @@ coord traverse(vector <vector<int>> &l, int x, int y, coord s, coord t){
                 }
                 else{
                     newSource.x = s.x;
-                    newSource.y = j-1;
+                    newSource.y = j+1;
                     newSource.z = s.z;
                     return newSource;
                 }
